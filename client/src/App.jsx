@@ -1,35 +1,70 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
+import AdminDashboard from "./pages/Admin/Dashboard";
+import UserDashboard from "./pages/User/Dashboard";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("authToken");
+    
+    return token ? true : false;
+  };
+
+  const getRole = () => {
+    return localStorage.getItem("role");
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <ToastContainer
+        position="top-center"
+        hideProgressBar={true}
+        autoClose={1500}
+      />
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              isAuthenticated() ? (
+                getRole() === "admin" ? (
+                  <Navigate to="/admin/dashboard" />
+                ) : (
+                  <Navigate to="/user/dashboard" />
+                )
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              isAuthenticated() && getRole() === "admin" ? (
+                <AdminDashboard />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/user/dashboard"
+            element={
+              isAuthenticated() && getRole() === "user" ? (
+                <UserDashboard />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+        </Routes>
+      </Router>
+    </div>
+  );
 }
 
-export default App
+export default App;
