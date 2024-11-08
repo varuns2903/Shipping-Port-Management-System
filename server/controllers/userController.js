@@ -37,7 +37,7 @@ const UserController = {
       const token = jwt.sign(
         { id: user.user_id, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "7d" }
       );
       res.json({
         token,
@@ -48,16 +48,6 @@ const UserController = {
           role: user.role,
         },
       });
-    });
-  },
-
-  getUsers: async (req, res) => {
-    db.query("SELECT * FROM Users", (err, results) => {
-      if (err) {
-        console.error("Error fetching users:", err);
-        return res.status(500).json({ message: "Error fetching users" });
-      }
-      res.json(results);
     });
   },
 };
