@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 const PortController = {
   getAllPorts: (req, res) => {
-    const query = "SELECT * FROM Ports";
+    const query = "SELECT * FROM Ports WHERE available_space > 0";
     db.query(query, (err, results) => {
       if (err) {
         console.error("Error fetching ports:", err);
