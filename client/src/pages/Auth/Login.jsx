@@ -31,7 +31,7 @@ const Login = () => {
       localStorage.setItem("role", role);
 
       toast.success("Login successful!");
-      navigate("/");
+      navigate(role === "admin" ? "/admin/dashboard" : "/user/dashboard");
     } catch (error) {
       console.error("Error during login:", error.response);
       toast.error(error.response?.data?.msg || "Login failed");

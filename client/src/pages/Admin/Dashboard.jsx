@@ -70,7 +70,7 @@ function AdminDashboard() {
         });
         setActivityLogs(logs.data.data);
       } catch (error) {
-        toast.error("Error fetching data");
+        toast.error(error.response.data.msg);
         console.error("Error fetching data", error.response || error);
       }
     };
@@ -87,13 +87,41 @@ function AdminDashboard() {
 
           {/* Overview Section */}
           <div className="d-flex flex-wrap">
-            <DashboardCard title="Total Users" value={userCount} />
-            <DashboardCard title="Total Ports" value={portCount} />
-            <DashboardCard title="Total Bookings" value={bookingCount} />
-            <DashboardCard title="Total Countries" value={countryCount} />
-            <DashboardCard title="Total Employees" value={employeeCount} />
-            <DashboardCard title="Total Ships" value={shipCount} />
-            <DashboardCard title="Total Containers" value={containerCount} />
+            <DashboardCard
+              title="Total Users"
+              value={userCount}
+              path="/admin/manage-users"
+            />
+            <DashboardCard
+              title="Total Ports"
+              value={portCount}
+              path="/admin/manage-ports"
+            />
+            <DashboardCard
+              title="Total Bookings"
+              value={bookingCount}
+              path="/admin/manage-bookings"
+            />
+            <DashboardCard
+              title="Total Countries"
+              value={countryCount}
+              path="/admin/manage-countries"
+            />
+            <DashboardCard
+              title="Total Employees"
+              value={employeeCount}
+              path="/admin/manage-employees"
+            />
+            <DashboardCard
+              title="Total Ships"
+              value={shipCount}
+              path="/admin/manage-ships"
+            />
+            <DashboardCard
+              title="Total Containers"
+              value={containerCount}
+              path="/admin/manage-containers"
+            />
           </div>
 
           {/* Quick Stats Section */}
@@ -103,11 +131,11 @@ function AdminDashboard() {
               <thead>
                 <tr>
                   <th>Port Name</th>
-                  <th>Capacity</th>
-                  <th>Available Space</th>
+                  <th>Capacity (TEU)</th>
+                  <th>Available Space (TEU)</th>
                   <th>Utilization (%)</th>
                   <th>Active Bookings</th>
-                  <th>Total Cargo Load (kg)</th>
+                  <th>Total Cargo Load (Tons)</th>
                 </tr>
               </thead>
               <tbody>

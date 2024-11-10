@@ -1,20 +1,27 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import AdminDashboard from "./pages/Admin/Dashboard";
 import UserDashboard from "./pages/User/Dashboard";
+import ManageUsers from "./pages/Admin/ManageUsers";
+import ProfilePage from "./pages/ProfilePage";
+import ManagePorts from "./pages/Admin/ManagePorts";
+import ManageBookings from "./pages/Admin/ManageBookings";
+import ManageCountries from "./pages/Admin/ManageCountries";
+import ManageEmployees from "./pages/Admin/ManageEmployees";
+import ManageShips from "./pages/Admin/ManageShips";
+import ManageContainers from "./pages/Admin/ManageContainers";
 
 function App() {
-  const isAuthenticated = () => {
-    const token = localStorage.getItem("authToken");
-    
-    return token ? true : false;
-  };
+  const isAuthenticated = () => !!localStorage.getItem("authToken");
 
-  const getRole = () => {
-    return localStorage.getItem("role");
-  };
+  const getRole = () => localStorage.getItem("role");
 
   return (
     <div>
@@ -31,8 +38,10 @@ function App() {
               isAuthenticated() ? (
                 getRole() === "admin" ? (
                   <Navigate to="/admin/dashboard" />
-                ) : (
+                ) : getRole() === "user" ? (
                   <Navigate to="/user/dashboard" />
+                ) : (
+                  <Navigate to="login" />
                 )
               ) : (
                 <Navigate to="/login" />
@@ -61,6 +70,14 @@ function App() {
               )
             }
           />
+          <Route path="/admin/manage-users" element={<ManageUsers />} />
+          <Route path="/admin/manage-ports" element={<ManagePorts />} />
+          <Route path="/admin/manage-bookings" element={<ManageBookings />} />
+          <Route path="/admin/manage-countries" element={<ManageCountries />} />
+          <Route path="/admin/manage-employees" element={<ManageEmployees />} />
+          <Route path="/admin/manage-ships" element={<ManageShips />} />
+          <Route path="/admin/manage-containers" element={<ManageContainers />} />
+          <Route path="/profile" element={<ProfilePage />}/>
         </Routes>
       </Router>
     </div>

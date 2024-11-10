@@ -50,6 +50,65 @@ const UserController = {
       });
     });
   },
+
+  getProfile: async (req, res) => {
+    const token = req.header("Authorization");
+
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      db.query(
+        "SELECT * FROM Users WHERE user_id = ?",
+        [decoded.id],
+        (err, results) => {
+          if (err) {
+            console.error("Error fetching user details:", err);
+            return res.status(500).json({
+              message: "Error fetching user details",
+              error: err.message,
+            });
+          }
+          res.json({ data: results[0] });
+        }
+      );
+    } catch (e) {
+      res.status(400).json({ msg: "Invalid token" });
+    }
+  },
+
+  updateProfile: async (req, res) => {
+    const token = req.header("Authorization");
+    const { username, email } = req.body;
+
+    if (!token) {
+      return res.status(401).json({ msg: "No token, authorization denied" });
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      db.query(
+        "UPDATE  Users SET username = ?, email = ? WHERE user_id = ?",
+        [username, email, decoded.id],
+        (err, results) => {
+          if (err) {
+            console.error("Error updating user details:", err);
+            return res.status(500).json({
+              message: "Error updating user details",
+              error: err.message,
+            });
+          }
+          res.json({ data: results[0] });
+        }
+      );
+    } catch (e) {
+      res.status(400).json({ msg: "Invalid token" });
+    }
+  },
 };
 
 module.exports = UserController;
