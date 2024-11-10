@@ -1,44 +1,6 @@
-// client/src/pages/User/Dashboard.jsx
+import React from 'react'
 
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
-
-function UserDashboard() {
-  const navigate = useNavigate();
-  const [recentBookings, setRecentBookings] = useState([]);
-  const [upcomingShipments, setUpcomingShipments] = useState([]);
-  const [containerStatuses, setContainerStatuses] = useState([]);
-
-  useEffect(() => {
-    const userId = 1; // Replace with actual logged-in user ID
-
-    // Fetch recent bookings
-    axios
-      .get(`/api/bookings/recent/${userId}`)
-      .then((response) => setRecentBookings(response.data))
-      .catch((error) =>
-        console.error("Error fetching recent bookings:", error)
-      );
-
-    // Fetch upcoming shipments
-    axios
-      .get(`/api/shipments/upcoming/${userId}`)
-      .then((response) => setUpcomingShipments(response.data))
-      .catch((error) =>
-        console.error("Error fetching upcoming shipments:", error)
-      );
-
-    // Fetch container statuses
-    axios
-      .get(`/api/shipments/container-status/${userId}`)
-      .then((response) => setContainerStatuses(response.data))
-      .catch((error) =>
-        console.error("Error fetching container statuses:", error)
-      );
-  }, []);
-
+const UserDashboard = () => {
   return (
     <div className="container mt-5">
       <h1 className="text-center mb-4 font-weight-bold">User Dashboard</h1>

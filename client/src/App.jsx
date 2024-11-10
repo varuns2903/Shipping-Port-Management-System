@@ -12,16 +12,23 @@ import BrowsePorts from "./pages/User/BrowsePorts";
 import BookPort from "./pages/User/BookPort";
 import TrackShipments from "./pages/User/TrackShipments";
 import UserDashboard from "./pages/User/Dashboard";
+import ManageUsers from "./pages/Admin/ManageUsers";
+import ProfilePage from "./pages/ProfilePage";
+import ManagePorts from "./pages/Admin/ManagePorts";
+import ManageBookings from "./pages/Admin/ManageBookings";
+import ManageCountries from "./pages/Admin/ManageCountries";
+import ManageEmployees from "./pages/Admin/ManageEmployees";
+import ManageShips from "./pages/Admin/ManageShips";
+import ManageContainers from "./pages/Admin/ManageContainers";
 
 function App() {
   const isAuthenticated = () => {
     const token = localStorage.getItem("authToken");
+    
     return token ? true : false;
   };
 
-  const getRole = () => {
-    return localStorage.getItem("role");
-  };
+  const getRole = () => localStorage.getItem("role");
 
   return (
     <div>
@@ -38,8 +45,10 @@ function App() {
               isAuthenticated() ? (
                 getRole() === "admin" ? (
                   <Navigate to="/admin/dashboard" />
-                ) : (
+                ) : getRole() === "user" ? (
                   <Navigate to="/user/dashboard" />
+                ) : (
+                  <Navigate to="login" />
                 )
               ) : (
                 <Navigate to="/login" />
@@ -70,10 +79,6 @@ function App() {
               )
             }
           />
-
-          <Route path="/user/browse-ports" element={<BrowsePorts />} />
-          <Route path="/user/book-port" element={<BookPort />} />
-          <Route path="/user/track-shipments" element={<TrackShipments />} />
         </Routes>
       </Router>
     </div>
