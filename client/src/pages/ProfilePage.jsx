@@ -16,7 +16,7 @@ function ProfilePage() {
       const headers = { Authorization: token };
 
       try {
-        const response = await axios.get("http://localhost:5000/api/profile", {
+        const response = await axios.get("http://localhost:5000/api/users/profile", {
           headers,
         });        
         setUserData(response.data.data);        
@@ -48,7 +48,7 @@ function ProfilePage() {
 
     try {
       await axios.put(
-        "http://localhost:5000/api/profile",
+        "http://localhost:5000/api/users/profile",
         { username: editedData.username, email: editedData.email },
         { headers }
       );
@@ -129,7 +129,7 @@ function ProfilePage() {
               {isEditing ? (
                 <>
                   <button
-                    className="btn btn-primary me-2"
+                    className="btn btn-dark me-2"
                     onClick={handleSaveChanges}
                   >
                     Save Changes

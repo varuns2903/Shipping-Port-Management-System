@@ -4,14 +4,22 @@ import { toast } from "react-toastify";
 
 function ManageCountries() {
   const [countries, setCountries] = useState([]);
+  const [filteredCountries, setFilteredCountries] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(null);
+  const [newCountry, setNewCountry] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [countriesPerPage] = useState(10);
+  const [countriesPerPage] = useState(20);
 
   useEffect(() => {
     fetchCountries();
   }, []);
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery, countries]);
 
   const fetchCountries = async () => {
     const token = localStorage.getItem("authToken");
@@ -27,9 +35,24 @@ function ManageCountries() {
     }
   };
 
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+    const filtered = countries.filter(
+      (country) =>
+        country.country_id.toString().includes(query) ||
+        country.country_name.toLowerCase().includes(query)
+    );
+    setFilteredCountries(filtered);
+  };
+
   const handleEditClick = (country) => {
     setSelectedCountry(country);
     setShowEditModal(true);
+  };
+
+  const handleAddCountryClick = () => {
+    setNewCountry("");
+    setShowAddModal(true);
   };
 
   const handleDeleteClick = async (countryId) => {
@@ -72,22 +95,61 @@ function ManageCountries() {
     }
   };
 
+  const handleAddNewCountry = async () => {
+    const token = localStorage.getItem("authToken");
+    const headers = { Authorization: token };
+    try {
+      await axios.post(
+        "http://localhost:5000/api/countries",
+        { country_name: newCountry },
+        { headers }
+      );
+
+      toast.success("Country added successfully");
+      fetchCountries();
+      setShowAddModal(false);
+    } catch (error) {
+      toast.error(error.response.data.message);
+      console.error("Error adding country:", error.response || error);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSelectedCountry({ ...selectedCountry, [name]: value });
+    if (name === "country_name") {
+      setSelectedCountry({ ...selectedCountry, [name]: value });
+    } else if (name === "newCountry") {
+      setNewCountry(value);
+    } else {
+      setSearchQuery(value);
+    }
   };
 
   const indexOfLastCountry = currentPage * countriesPerPage;
   const indexOfFirstCountry = indexOfLastCountry - countriesPerPage;
-  const currentCountries = countries.slice(
+  const currentCountries = filteredCountries.slice(
     indexOfFirstCountry,
     indexOfLastCountry
   );
-  const totalPages = Math.ceil(countries.length / countriesPerPage);
+  const totalPages = Math.ceil(filteredCountries.length / countriesPerPage);
 
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Manage Countries</h2>
+
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by Country ID or Name"
+          value={searchQuery}
+          onChange={handleChange}
+        />
+      </div>
+
+      <button className="btn btn-dark mb-3" onClick={handleAddCountryClick}>
+        Add Country
+      </button>
 
       <div className="table-responsive">
         <table className="table table-striped table-bordered table-hover">
@@ -148,11 +210,11 @@ function ManageCountries() {
                 key={index}
                 className={`page-item ${
                   currentPage === index + 1 ? "active" : ""
-                }`}
+                } mx-1`}
               >
                 <button
                   onClick={() => setCurrentPage(index + 1)}
-                  className="page-link bg-transparent border-0"
+                  className="page-link text-dark border-0"
                 >
                   {index + 1}
                 </button>
@@ -161,7 +223,7 @@ function ManageCountries() {
             <li
               className={`page-item ${
                 currentPage === totalPages ? "disabled" : ""
-              }`}
+              } mx-1`}
             >
               <button
                 onClick={() => setCurrentPage(currentPage + 1)}
@@ -216,6 +278,55 @@ function ManageCountries() {
                   onClick={handleSaveChanges}
                 >
                   Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Modal */}
+      {showAddModal && (
+        <div className="modal fade show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Add Country</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowAddModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label htmlFor="newCountryName" className="form-label">
+                    Country Name
+                  </label>
+                  <input
+                    type="text"
+                    id="newCountryName"
+                    name="newCountry"
+                    className="form-control"
+                    value={newCountry}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleAddNewCountry}
+                >
+                  Add Country
                 </button>
               </div>
             </div>

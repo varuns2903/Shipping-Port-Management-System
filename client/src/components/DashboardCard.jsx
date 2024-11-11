@@ -9,7 +9,7 @@ function DashboardCard({ title, value, path }) {
       <div className="card-body">
         <h5 className="card-title">{title}</h5>
         <div className="d-flex align-items-center justify-content-between">
-          <p className="card-text mb-0">{value}</p>
+          <h5 className="card-text mb-0">{value}</h5>
           <button
             className="btn btn-dark btn-sm ms-2"
             onClick={() => navigate(path)}

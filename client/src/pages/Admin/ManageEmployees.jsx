@@ -4,13 +4,26 @@ import { toast } from "react-toastify";
 
 function ManageEmployees() {
   const [employees, setEmployees] = useState([]);
+  const [ports, setPorts] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [newEmployee, setNewEmployee] = useState({
+    first_name: "",
+    last_name: "",
+    position: "",
+    salary: "",
+    hire_date: "",
+    port_id: "",
+    port_name: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const [employeesPerPage] = useState(10);
+  const [employeesPerPage] = useState(15);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchEmployees();
+    fetchPorts();
   }, []);
 
   const fetchEmployees = async () => {
@@ -22,10 +35,60 @@ function ManageEmployees() {
         headers,
       });
       setEmployees(response.data.data);
-      
     } catch (error) {
       toast.error("Failed to fetch employees");
       console.error("Error fetching employees:", error.response || error);
+    }
+  };
+
+  const fetchPorts = async () => {
+    const token = localStorage.getItem("authToken");
+    const headers = { Authorization: token };
+
+    try {
+      const response = await axios.get("http://localhost:5000/api/ports", {
+        headers,
+      });
+      setPorts(response.data.data);
+    } catch (error) {
+      toast.error("Failed to fetch ports");
+      console.error("Error fetching ports:", error.response || error);
+    }
+  };
+
+  const handleAddEmployee = async () => {
+    const token = localStorage.getItem("authToken");
+    const headers = { Authorization: token };
+
+    const employeeToAdd = {
+      ...newEmployee,
+      port_name:
+        ports.find((port) => port.port_id === newEmployee.port_id)?.port_name ||
+        "",
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/employees",
+        employeeToAdd,
+        { headers }
+      );
+      setEmployees([...employees, response.data.data]);
+      toast.success("Employee added successfully");
+      setShowAddModal(false);
+      fetchEmployees();
+      setNewEmployee({
+        first_name: "",
+        last_name: "",
+        position: "",
+        salary: "",
+        hire_date: "",
+        port_id: "",
+        port_name: "",
+      });
+    } catch (error) {
+      toast.error("Failed to add employee");
+      console.error("Error adding employee:", error.response || error);
     }
   };
 
@@ -62,14 +125,7 @@ function ManageEmployees() {
     try {
       await axios.put(
         `http://localhost:5000/api/employees/${selectedEmployee.employee_id}`,
-        {
-          first_name: selectedEmployee.first_name,
-          last_name: selectedEmployee.last_name,
-          position: selectedEmployee.position,
-          salary: selectedEmployee.salary,
-          hire_date: selectedEmployee.hire_date,
-          port_id: selectedEmployee.port_id,
-        },
+        selectedEmployee,
         { headers }
       );
 
@@ -82,22 +138,53 @@ function ManageEmployees() {
     }
   };
 
+  const handleNewEmployeeChange = (e) => {
+    const { name, value } = e.target;
+    setNewEmployee({ ...newEmployee, [name]: value });
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSelectedEmployee({ ...selectedEmployee, [name]: value });
   };
 
+  const filteredEmployees = employees.filter((employee) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      employee.employee_id.toString().toLowerCase().includes(searchLower) ||
+      employee.first_name.toLowerCase().includes(searchLower) ||
+      employee.last_name.toLowerCase().includes(searchLower) ||
+      employee.position.toLowerCase().includes(searchLower) ||
+      employee.port_name.toLowerCase().includes(searchLower)
+    );
+  });
+
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentEmployees = employees.slice(
+  const currentEmployees = filteredEmployees.slice(
     indexOfFirstEmployee,
     indexOfLastEmployee
   );
-  const totalPages = Math.ceil(employees.length / employeesPerPage);
+  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Manage Employees</h2>
+
+      <input
+        type="text"
+        className="form-control mb-4"
+        placeholder="Search by ID, Name, Position, or Port Name"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+
+      <button
+        className="btn btn-dark mb-4"
+        onClick={() => setShowAddModal(true)}
+      >
+        Add Employee
+      </button>
 
       <div className="table-responsive">
         <table className="table table-striped table-bordered table-hover">
@@ -109,7 +196,7 @@ function ManageEmployees() {
               <th className="text-center">Position</th>
               <th className="text-center">Salary</th>
               <th className="text-center">Hire Date</th>
-              <th className="text-center">Port</th>
+              <th className="text-center">Port Name</th>
               <th className="text-center">Actions</th>
             </tr>
           </thead>
@@ -123,7 +210,7 @@ function ManageEmployees() {
                   <td className="text-center">{employee.position}</td>
                   <td className="text-center">₹{employee.salary}</td>
                   <td className="text-center">{employee.hire_date}</td>
-                  <td className="text-center">{employee.port_id}</td>
+                  <td className="text-center">{employee.port_name}</td>
                   <td className="text-center">
                     <button
                       className="btn btn-dark btn-sm me-2"
@@ -275,16 +362,21 @@ function ManageEmployees() {
                 </div>
                 <div className="mb-3">
                   <label htmlFor="portId" className="form-label">
-                    Port ID
+                    Port Name
                   </label>
-                  <input
-                    type="number"
+                  <select
                     id="portId"
                     name="port_id"
-                    className="form-control"
+                    className="form-select"
                     value={selectedEmployee.port_id}
                     onChange={handleChange}
-                  />
+                  >
+                    {ports.map((port) => (
+                      <option key={port.port_id} value={port.port_id}>
+                        {port.port_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="modal-footer">
@@ -301,6 +393,126 @@ function ManageEmployees() {
                   onClick={handleSaveChanges}
                 >
                   Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Employee Modal */}
+      {showAddModal && (
+        <div className="modal fade show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Add New Employee</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowAddModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label htmlFor="firstName" className="form-label">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="first_name"
+                    className="form-control"
+                    value={newEmployee.first_name}
+                    onChange={handleNewEmployeeChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="lastName" className="form-label">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="last_name"
+                    className="form-control"
+                    value={newEmployee.last_name}
+                    onChange={handleNewEmployeeChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="position" className="form-label">
+                    Position
+                  </label>
+                  <input
+                    type="text"
+                    id="position"
+                    name="position"
+                    className="form-control"
+                    value={newEmployee.position}
+                    onChange={handleNewEmployeeChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="salary" className="form-label">
+                    Salary
+                  </label>
+                  <input
+                    type="number"
+                    id="salary"
+                    name="salary"
+                    className="form-control"
+                    value={newEmployee.salary}
+                    onChange={handleNewEmployeeChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="hireDate" className="form-label">
+                    Hire Date
+                  </label>
+                  <input
+                    type="date"
+                    id="hireDate"
+                    name="hire_date"
+                    className="form-control"
+                    value={newEmployee.hire_date}
+                    onChange={handleNewEmployeeChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="portId" className="form-label">
+                    Port Name
+                  </label>
+                  <select
+                    id="portId"
+                    name="port_id"
+                    className="form-select"
+                    value={newEmployee.port_id}
+                    onChange={handleNewEmployeeChange}
+                  >
+                    <option value="">Select Port</option>
+                    {ports.map((port) => (
+                      <option key={port.port_id} value={port.port_id}>
+                        {port.port_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleAddEmployee}
+                >
+                  Add Employee
                 </button>
               </div>
             </div>

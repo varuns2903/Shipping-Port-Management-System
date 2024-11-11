@@ -4,14 +4,23 @@ import { toast } from "react-toastify";
 
 function ManageContainers() {
   const [containers, setContainers] = useState([]);
+  const [filteredContainers, setFilteredContainers] = useState([]);
+  const [ships, setShips] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedContainer, setSelectedContainer] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [containersPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     fetchContainers();
+    fetchShips();
   }, []);
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery, statusFilter, containers]);
 
   const fetchContainers = async () => {
     const token = localStorage.getItem("authToken");
@@ -26,6 +35,34 @@ function ManageContainers() {
       toast.error("Failed to fetch containers");
       console.error("Error fetching containers:", error.response || error);
     }
+  };
+
+  const fetchShips = async () => {
+    const token = localStorage.getItem("authToken");
+    const headers = { Authorization: token };
+
+    try {
+      const response = await axios.get("http://localhost:5000/api/ships", {
+        headers,
+      });
+      setShips(response.data.data);
+    } catch (error) {
+      toast.error("Failed to fetch ships");
+      console.error("Error fetching ships:", error.response || error);
+    }
+  };
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+    const filtered = containers.filter(
+      (container) =>
+        [container.container_id, container.container_type, container.ship_name]
+          .join(" ")
+          .toLowerCase()
+          .includes(query) &&
+        (statusFilter === "" || container.booking_status === statusFilter)
+    );
+    setFilteredContainers(filtered);
   };
 
   const handleEditClick = (container) => {
@@ -89,15 +126,82 @@ function ManageContainers() {
 
   const indexOfLastContainer = currentPage * containersPerPage;
   const indexOfFirstContainer = indexOfLastContainer - containersPerPage;
-  const currentContainers = containers.slice(
+  const currentContainers = filteredContainers.slice(
     indexOfFirstContainer,
     indexOfLastContainer
   );
-  const totalPages = Math.ceil(containers.length / containersPerPage);
+  const totalPages = Math.ceil(filteredContainers.length / containersPerPage);
 
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Manage Containers</h2>
+
+      <input
+        type="text"
+        className="form-control mb-3"
+        placeholder="Search by Container ID, Type, or Ship"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+
+      <div className="mb-3">
+        <div className="form-check form-check-inline">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="statusAll"
+            name="statusFilter"
+            value=""
+            checked={statusFilter === ""}
+            onChange={() => setStatusFilter("")}
+          />
+          <label className="form-check-label" htmlFor="statusAll">
+            All
+          </label>
+        </div>
+        <div className="form-check form-check-inline">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="statusPending"
+            name="statusFilter"
+            value="pending"
+            checked={statusFilter === "pending"}
+            onChange={() => setStatusFilter("pending")}
+          />
+          <label className="form-check-label" htmlFor="statusPending">
+            Pending
+          </label>
+        </div>
+        <div className="form-check form-check-inline">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="statusConfirmed"
+            name="statusFilter"
+            value="confirmed"
+            checked={statusFilter === "confirmed"}
+            onChange={() => setStatusFilter("confirmed")}
+          />
+          <label className="form-check-label" htmlFor="statusConfirmed">
+            Confirmed
+          </label>
+        </div>
+        <div className="form-check form-check-inline">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="statusCanceled"
+            name="statusFilter"
+            value="canceled"
+            checked={statusFilter === "canceled"}
+            onChange={() => setStatusFilter("canceled")}
+          />
+          <label className="form-check-label" htmlFor="statusCanceled">
+            Canceled
+          </label>
+        </div>
+      </div>
 
       <div className="table-responsive">
         <table className="table table-striped table-bordered table-hover">
@@ -247,28 +351,32 @@ function ManageContainers() {
                 </div>
                 <div className="mb-3">
                   <label htmlFor="ship" className="form-label">
-                    Ship ID
+                    Ship
                   </label>
-                  <input
-                    type="number"
+                  <select
                     id="ship"
                     name="ship_id"
                     className="form-control"
                     value={selectedContainer.ship_id}
                     onChange={handleChange}
-                  />
+                  >
+                    {ships.map((ship) => (
+                      <option key={ship.ship_id} value={ship.ship_id}>
+                        {ship.ship_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="booking" className="form-label">
-                    Booking ID
+                    Booking Status
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     id="booking"
-                    name="booking_id"
                     className="form-control"
-                    value={selectedContainer.booking_id}
-                    onChange={handleChange}
+                    value={selectedContainer.booking_status}
+                    readOnly
                   />
                 </div>
               </div>

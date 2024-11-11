@@ -4,14 +4,21 @@ import { toast } from "react-toastify";
 
 function ManageBookings() {
   const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [bookingsPerPage] = useState(10);
+  const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery, statusFilter, bookings]);
 
   const fetchBookings = async () => {
     const token = localStorage.getItem("authToken");
@@ -25,6 +32,22 @@ function ManageBookings() {
       toast.error("Failed to fetch bookings");
       console.error("Error fetching bookings:", error.response || error);
     }
+  };
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+    const filtered = bookings.filter(
+      (booking) =>
+        (booking.booking_id.toString().includes(query) ||
+          booking.user_id.toString().includes(query) ||
+          booking.username.toLowerCase().includes(query) ||
+          booking.port_id.toString().includes(query) ||
+          booking.port_name.toLowerCase().includes(query) ||
+          booking.ship_id.toString().includes(query) ||
+          booking.ship_name.toLowerCase().includes(query)) &&
+        (statusFilter === "" || booking.booking_status === statusFilter)
+    );
+    setFilteredBookings(filtered);
   };
 
   const handleEditClick = (booking) => {
@@ -79,24 +102,93 @@ function ManageBookings() {
 
   const indexOfLastBooking = currentPage * bookingsPerPage;
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
-  const currentBookings = bookings.slice(
+  const currentBookings = filteredBookings.slice(
     indexOfFirstBooking,
     indexOfLastBooking
   );
-  const totalPages = Math.ceil(bookings.length / bookingsPerPage);
+  const totalPages = Math.ceil(filteredBookings.length / bookingsPerPage);
 
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Manage Bookings</h2>
+
+      <div className="mb-4">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by Booking ID, User ID, Name, Port ID, Port Name, Ship ID, Ship Name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      <div className="mb-3">
+        <div className="form-check form-check-inline">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="statusAll"
+            name="statusFilter"
+            value=""
+            checked={statusFilter === ""}
+            onChange={() => setStatusFilter("")}
+          />
+          <label className="form-check-label" htmlFor="statusAll">
+            All
+          </label>
+        </div>
+        <div className="form-check form-check-inline">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="statusPending"
+            name="statusFilter"
+            value="pending"
+            checked={statusFilter === "pending"}
+            onChange={() => setStatusFilter("pending")}
+          />
+          <label className="form-check-label" htmlFor="statusPending">
+            Pending
+          </label>
+        </div>
+        <div className="form-check form-check-inline">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="statusConfirmed"
+            name="statusFilter"
+            value="confirmed"
+            checked={statusFilter === "confirmed"}
+            onChange={() => setStatusFilter("confirmed")}
+          />
+          <label className="form-check-label" htmlFor="statusConfirmed">
+            Confirmed
+          </label>
+        </div>
+        <div className="form-check form-check-inline">
+          <input
+            className="form-check-input"
+            type="radio"
+            id="statusCanceled"
+            name="statusFilter"
+            value="canceled"
+            checked={statusFilter === "canceled"}
+            onChange={() => setStatusFilter("canceled")}
+          />
+          <label className="form-check-label" htmlFor="statusCanceled">
+            Canceled
+          </label>
+        </div>
+      </div>
 
       <div className="table-responsive">
         <table className="table table-striped table-bordered table-hover">
           <thead className="table-dark">
             <tr>
               <th className="text-center">Booking ID</th>
-              <th className="text-center">User ID</th>
-              <th className="text-center">Port ID</th>
-              <th className="text-center">Ship ID</th>
+              <th className="text-center">User</th>
+              <th className="text-center">Port</th>
+              <th className="text-center">Ship</th>
               <th className="text-center">Booking Date</th>
               <th className="text-center">Status</th>
               <th className="text-center">Actions</th>
@@ -107,9 +199,15 @@ function ManageBookings() {
               currentBookings.map((booking) => (
                 <tr key={booking.booking_id}>
                   <td className="text-center">{booking.booking_id}</td>
-                  <td className="text-center">{booking.user_id}</td>
-                  <td className="text-center">{booking.port_id}</td>
-                  <td className="text-center">{booking.ship_id}</td>
+                  <td className="text-center">
+                    {booking.user_id} - {booking.username}
+                  </td>
+                  <td className="text-center">
+                    {booking.port_id} - {booking.port_name}
+                  </td>
+                  <td className="text-center">
+                    {booking.ship_id} - {booking.ship_name}
+                  </td>
                   <td className="text-center">
                     {new Date(booking.booking_date).toLocaleDateString()}
                   </td>

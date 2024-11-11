@@ -4,14 +4,31 @@ import { toast } from "react-toastify";
 
 function ManagePorts() {
   const [ports, setPorts] = useState([]);
+  const [filteredPorts, setFilteredPorts] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedPort, setSelectedPort] = useState(null);
+  const [newPort, setNewPort] = useState({
+    port_name: "",
+    capacity: "",
+    available_space: "",
+    location: "",
+    country_id: "",
+    country_name: "",
+  });
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [portsPerPage] = useState(10);
 
   useEffect(() => {
     fetchPorts();
+    fetchCountries();
   }, []);
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchQuery, ports]);
 
   const fetchPorts = async () => {
     const token = localStorage.getItem("authToken");
@@ -28,6 +45,32 @@ function ManagePorts() {
     }
   };
 
+  const fetchCountries = async () => {
+    const token = localStorage.getItem("authToken");
+    const headers = { Authorization: token };
+
+    try {
+      const response = await axios.get("http://localhost:5000/api/countries", {
+        headers,
+      });
+      setCountries(response.data.data);
+    } catch (error) {
+      toast.error("Failed to fetch countries");
+      console.error("Error fetching countries:", error.response || error);
+    }
+  };
+
+  const handleSearch = () => {
+    const query = searchQuery.toLowerCase();
+    const filtered = ports.filter(
+      (port) =>
+        port.port_name.toLowerCase().includes(query) ||
+        port.country_name.toLowerCase().includes(query) ||
+        port.port_id.toString().includes(query)
+    );
+    setFilteredPorts(filtered);
+  };
+
   const handleEditClick = (port) => {
     setSelectedPort(port);
     setShowEditModal(true);
@@ -42,6 +85,7 @@ function ManagePorts() {
           headers,
         });
         setPorts(ports.filter((port) => port.port_id !== portId));
+        fetchPorts();
         toast.success("Port deleted successfully");
       } catch (error) {
         toast.error("Failed to delete port");
@@ -58,6 +102,8 @@ function ManagePorts() {
         `http://localhost:5000/api/ports/${selectedPort.port_id}`,
         {
           port_name: selectedPort.port_name,
+          country_id: selectedPort.country_id,
+          country: selectedPort.country_name,
           capacity: selectedPort.capacity,
           available_space: selectedPort.available_space,
           location: selectedPort.location,
@@ -79,14 +125,59 @@ function ManagePorts() {
     setSelectedPort({ ...selectedPort, [name]: value });
   };
 
+  const handleAddPortChange = (e) => {
+    const { name, value } = e.target;
+    setNewPort({ ...newPort, [name]: value });
+  };
+
+  const handleAddNewPort = async () => {
+    const token = localStorage.getItem("authToken");
+    const headers = { Authorization: token };
+
+    try {
+      await axios.post("http://localhost:5000/api/ports", newPort, { headers });
+      toast.success("Port added successfully");
+      setShowAddModal(false);
+      fetchPorts();
+      setNewPort({
+        port_name: "",
+        capacity: "",
+        available_space: "",
+        location: "",
+        country_id: "",
+        country_name: "",
+      });
+    } catch (error) {
+      toast.error("Failed to add port");
+      console.error("Error adding port:", error.response || error);
+    }
+  };
+
   const indexOfLastPort = currentPage * portsPerPage;
   const indexOfFirstPort = indexOfLastPort - portsPerPage;
-  const currentPorts = ports.slice(indexOfFirstPort, indexOfLastPort);
-  const totalPages = Math.ceil(ports.length / portsPerPage);
+  const currentPorts = filteredPorts.slice(indexOfFirstPort, indexOfLastPort);
+  const totalPages = Math.ceil(filteredPorts.length / portsPerPage);
 
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Manage Ports</h2>
+
+      <div className="mb-4">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by Port ID or Port Name or Country Name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      <button
+        className="btn btn-dark mb-4"
+        onClick={() => setShowAddModal(true)}
+      >
+        Add New Port
+      </button>
 
       <div className="table-responsive">
         <table className="table table-striped table-bordered table-hover">
@@ -94,6 +185,7 @@ function ManagePorts() {
             <tr>
               <th className="text-center">Port ID</th>
               <th className="text-center">Port Name</th>
+              <th className="text-center">Country Name</th>
               <th className="text-center">Capacity</th>
               <th className="text-center">Available Space</th>
               <th className="text-center">Location</th>
@@ -106,6 +198,7 @@ function ManagePorts() {
                 <tr key={port.port_id}>
                   <td className="text-center">{port.port_id}</td>
                   <td className="text-center">{port.port_name}</td>
+                  <td className="text-center">{port.country_name}</td>
                   <td className="text-center">{port.capacity}</td>
                   <td className="text-center">{port.available_space}</td>
                   <td className="text-center">{port.location}</td>
@@ -177,6 +270,116 @@ function ManagePorts() {
             </li>
           </ul>
         </nav>
+      )}
+
+      {/* Add New Port Modal */}
+      {showAddModal && (
+        <div className="modal fade show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Add New Port</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowAddModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label htmlFor="portName" className="form-label">
+                    Port Name
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="portName"
+                    name="port_name"
+                    value={newPort.port_name}
+                    onChange={handleAddPortChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="capacity" className="form-label">
+                    Capacity
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    id="capacity"
+                    name="capacity"
+                    value={newPort.capacity}
+                    onChange={handleAddPortChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="availableSpace" className="form-label">
+                    Available Space
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    id="availableSpace"
+                    name="available_space"
+                    value={newPort.available_space}
+                    onChange={handleAddPortChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="location" className="form-label">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="location"
+                    name="location"
+                    value={newPort.location}
+                    onChange={handleAddPortChange}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="country" className="form-label">
+                    Country
+                  </label>
+                  <select
+                    className="form-select"
+                    id="country"
+                    name="country_id"
+                    value={newPort.country_id}
+                    onChange={handleAddPortChange}
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((country) => (
+                      <option
+                        key={country.country_id}
+                        value={country.country_id}
+                      >
+                        {country.country_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleAddNewPort}
+                >
+                  Save New Port
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Edit Modal */}
