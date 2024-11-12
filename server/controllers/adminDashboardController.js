@@ -1,5 +1,4 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 
 const adminDashboardController = {
@@ -13,6 +12,63 @@ const adminDashboardController = {
       }
       res.json({ data: results });
     });
+  },
+
+  addUser: async (req, res) => {
+    const { username, email, password, role } = req.body;
+
+    if (!username || !email || !password || !role) {
+      return res.status(400).json({
+        message: "All fields (username, email, password, role) are required",
+      });
+    }
+
+    try {
+      db.query(
+        "SELECT * FROM Users WHERE username = ? OR email = ?",
+        [username, email],
+        async (err, results) => {
+          if (err) {
+            console.error("Error checking existing users:", err);
+            return res.status(500).json({
+              message: "Error checking existing users",
+              error: err.message,
+            });
+          }
+
+          if (results.length > 0) {
+            return res.status(409).json({
+              message: "User with the same username or email already exists",
+            });
+          }
+
+          const hashedPassword = await bcrypt.hash(password, 10);
+
+          db.query(
+            "INSERT INTO Users (username, email, password, role) VALUES (?, ?, ?, ?)",
+            [username, email, hashedPassword, role],
+            (err, result) => {
+              if (err) {
+                console.error("Error adding user:", err);
+                return res
+                  .status(500)
+                  .json({ message: "Error adding user", error: err.message });
+              }
+
+              res.status(201).json({
+                message: "User added successfully",
+                user_id: result.insertId,
+              });
+            }
+          );
+        }
+      );
+    } catch (error) {
+      console.error("Error processing user addition:", error);
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
   },
 
   editUser: async (req, res) => {
@@ -56,15 +112,56 @@ const adminDashboardController = {
   },
 
   getPorts: async (req, res) => {
-    db.query("SELECT * FROM Ports", (err, results) => {
-      if (err) {
-        console.error("Error fetching ports:", err);
-        return res
-          .status(500)
-          .json({ message: "Error fetching ports", error: err.message });
+    db.query(
+      "SELECT Ports.*, Country.country_name FROM Ports LEFT JOIN Country ON Ports.country_id = Country.country_id;",
+      (err, results) => {
+        if (err) {
+          console.error("Error fetching ports:", err);
+          return res
+            .status(500)
+            .json({ message: "Error fetching ports", error: err.message });
+        }
+        res.json({ data: results });
       }
-      res.json({ data: results });
-    });
+    );
+  },
+
+  addPort: async (req, res) => {
+    const { port_name, capacity, available_space, location, country_id } =
+      req.body;
+
+    if (
+      !port_name ||
+      !capacity ||
+      !available_space ||
+      !location ||
+      !country_id
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const query = `
+      INSERT INTO Ports (port_name, capacity, available_space, location, country_id)
+      VALUES (?, ?, ?, ?, ?);
+    `;
+
+    db.query(
+      query,
+      [port_name, capacity, available_space, location, country_id],
+      (err, result) => {
+        if (err) {
+          console.error("Error adding port:", err);
+          return res
+            .status(500)
+            .json({ message: "Error adding port", error: err.message });
+        }
+
+        res.status(201).json({
+          message: "Port added successfully",
+          port_id: result.insertId,
+        });
+      }
+    );
   },
 
   editPort: async (req, res) => {
@@ -111,7 +208,23 @@ const adminDashboardController = {
   },
 
   getBookings: async (req, res) => {
-    db.query("SELECT * FROM Bookings", (err, results) => {
+    const query = `
+        SELECT 
+            Bookings.*,
+            Users.username,
+            Ports.port_name,
+            Ships.ship_name
+        FROM 
+            Bookings
+        LEFT JOIN 
+            Users ON Bookings.user_id = Users.user_id
+        LEFT JOIN 
+            Ports ON Bookings.port_id = Ports.port_id
+        LEFT JOIN 
+            Ships ON Bookings.ship_id = Ships.ship_id
+    `;
+
+    db.query(query, (err, results) => {
       if (err) {
         console.error("Error fetching bookings:", err);
         return res
@@ -177,6 +290,44 @@ const adminDashboardController = {
     });
   },
 
+  addCountry: async (req, res) => {
+    const { country_name } = req.body;
+
+    if (!country_name) {
+      return res.status(400).json({ message: "Country name is required" });
+    }
+
+    const checkQuery = "SELECT * FROM Country WHERE country_name = ?";
+    db.query(checkQuery, [country_name], (err, results) => {
+      if (err) {
+        console.error("Error checking country existence:", err);
+        return res.status(500).json({
+          message: "Error checking country existence",
+          error: err.message,
+        });
+      }
+
+      if (results.length > 0) {
+        return res.status(409).json({ message: "Country already exists" });
+      }
+
+      const insertQuery = "INSERT INTO Country (country_name) VALUES (?)";
+      db.query(insertQuery, [country_name], (err, results) => {
+        if (err) {
+          console.error("Error adding country:", err);
+          return res
+            .status(500)
+            .json({ message: "Error adding country", error: err.message });
+        }
+
+        res.status(201).json({
+          message: "Country added successfully",
+          data: { country_id: results.insertId, country_name },
+        });
+      });
+    });
+  },
+
   editCountries: async (req, res) => {
     const { country_id } = req.params;
     const { country_name } = req.body;
@@ -221,7 +372,13 @@ const adminDashboardController = {
   },
 
   getEmployees: async (req, res) => {
-    db.query("SELECT * FROM Employee", (err, results) => {
+    const query = `
+      SELECT Employee.*, Ports.port_name
+      FROM Employee
+      LEFT JOIN Ports ON Employee.port_id = Ports.port_id
+    `;
+
+    db.query(query, (err, results) => {
       if (err) {
         console.error("Error fetching employees:", err);
         return res
@@ -229,6 +386,77 @@ const adminDashboardController = {
           .json({ message: "Error fetching employees", error: err.message });
       }
       res.json({ data: results });
+    });
+  },
+
+  addEmployee: async (req, res) => {
+    const {
+      first_name,
+      last_name,
+      position,
+      salary,
+      hire_date,
+      port_id,
+      port_name,
+    } = req.body;
+
+    if (
+      !first_name ||
+      !last_name ||
+      !position ||
+      !salary ||
+      !hire_date ||
+      !port_id
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const checkQuery =
+      "SELECT * FROM Employee WHERE first_name = ? AND last_name = ?";
+    db.query(checkQuery, [first_name, last_name], (err, results) => {
+      if (err) {
+        console.error("Error checking employee existence:", err);
+        return res.status(500).json({
+          message: "Error checking employee existence",
+          error: err.message,
+        });
+      }
+
+      if (results.length > 0) {
+        return res.status(409).json({ message: "Employee already exists" });
+      }
+
+      const insertQuery = `
+        INSERT INTO Employee (first_name, last_name, position, salary, hire_date, port_id) 
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+      db.query(
+        insertQuery,
+        [first_name, last_name, position, salary, hire_date, port_id],
+        (err, results) => {
+          if (err) {
+            console.error("Error adding employee:", err);
+            return res.status(500).json({
+              message: "Error adding employee",
+              error: err.message,
+            });
+          }
+
+          res.status(201).json({
+            message: "Employee added successfully",
+            data: {
+              employee_id: results.insertId,
+              first_name,
+              last_name,
+              position,
+              salary,
+              hire_date,
+              port_id,
+              port_name,
+            },
+          });
+        }
+      );
     });
   },
 
@@ -286,7 +514,10 @@ const adminDashboardController = {
 
   getShips: async (req, res) => {
     db.query(
-      "SELECT Ships.*, Country.country_name FROM Ships LEFT JOIN Country ON Ships.country_id = Country.country_id;",
+      `SELECT Ships.*, Country.country_name, Ports.port_name
+       FROM Ships
+       LEFT JOIN Country ON Ships.country_id = Country.country_id
+       LEFT JOIN Ports ON Ships.port_id = Ports.port_id;`,
       (err, results) => {
         if (err) {
           console.error("Error fetching ships:", err);
@@ -297,6 +528,88 @@ const adminDashboardController = {
         res.json({ data: results });
       }
     );
+  },
+
+  addShip: async (req, res) => {
+    const {
+      ship_name,
+      capacity,
+      registration_number,
+      owner,
+      country_id,
+      port_id,
+    } = req.body;
+
+    if (
+      !ship_name ||
+      !capacity ||
+      !registration_number ||
+      !owner ||
+      !country_id ||
+      !port_id
+    ) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const checkQuery = `SELECT * FROM Ships WHERE registration_number = ?`;
+    
+    db.query(checkQuery, [registration_number], (err, results) => {
+      if (err) {
+        console.error("Error checking ship existence:", err);
+        return res
+          .status(500)
+          .json({
+            message: "Error checking ship existence",
+            error: err.message,
+          });
+      }
+
+      if (results.length > 0) {
+        return res
+          .status(400)
+          .json({
+            message: "Ship with this registration number already exists.",
+          });
+      }
+
+      const insertQuery = `
+      INSERT INTO Ships (ship_name, capacity, registration_number, owner, country_id, port_id)
+      VALUES (?, ?, ?, ?, ?, ?)`;
+
+      const values = [
+        ship_name,
+        capacity,
+        registration_number,
+        owner,
+        country_id,
+        port_id,
+      ];
+
+      db.query(insertQuery, values, (err, results) => {
+        if (err) {
+          console.error("Error adding ship:", err);
+          return res
+            .status(500)
+            .json({ message: "Error adding ship", error: err.message });
+        }
+
+        db.query(
+          `SELECT Ships.*, Country.country_name, Ports.port_name
+         FROM Ships
+         LEFT JOIN Country ON Ships.country_id = Country.country_id
+         LEFT JOIN Ports ON Ships.port_id = Ports.port_id`,
+          (err, results) => {
+            if (err) {
+              console.error("Error fetching ships:", err);
+              return res
+                .status(500)
+                .json({ message: "Error fetching ships", error: err.message });
+            }
+            res.json({ data: results });
+          }
+        );
+      });
+    });
   },
 
   editShips: async (req, res) => {
@@ -377,7 +690,7 @@ const adminDashboardController = {
     );
   },
 
-  editContainers: async (req, res) => {
+  editContainer: async (req, res) => {
     const { container_id } = req.params;
     const { container_type, weight, contents, ship_id, booking_id } = req.body;
 
