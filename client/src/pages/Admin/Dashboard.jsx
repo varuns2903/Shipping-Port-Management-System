@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import Navbar from "../../components/Navbar";
 import DashboardCard from "../../components/DashboardCard";
 
 function AdminDashboard() {
@@ -81,7 +80,6 @@ function AdminDashboard() {
   return (
     <div className="d-flex">
       <div className="flex-grow-1">
-        <Navbar />
         <div className="container mt-4">
           <h2>Admin Dashboard</h2>
 

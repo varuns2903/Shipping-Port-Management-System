@@ -14,7 +14,7 @@ CREATE TABLE Ports (
     capacity INT NOT NULL,
     available_space INT NOT NULL,
     location VARCHAR(255),
-    FOREIGN KEY (country_id) REFERENCES Country(country_id) ON DELETE SET NULL
+    FOREIGN KEY (country_id) REFERENCES Country(country_id) ON DELETE CASCADE
 );
 
 -- Employee Table
@@ -42,20 +42,10 @@ CREATE TABLE Ships (
     FOREIGN KEY (port_id) REFERENCES Ports(port_id) ON DELETE SET NULL
 );
 
--- Shares Table
-CREATE TABLE Shares (
-    share_id INT PRIMARY KEY AUTO_INCREMENT,
-    country_id INT,
-    port_id INT,
-    percentage_share DECIMAL(5, 2) CHECK (percentage_share >= 0 AND percentage_share <= 100),
-    FOREIGN KEY (country_id) REFERENCES Country(country_id) ON DELETE CASCADE,
-    FOREIGN KEY (port_id) REFERENCES Ports(port_id) ON DELETE CASCADE
-);
-
 -- Users Table
 CREATE TABLE Users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) UNIQUE NOT NULL,
+    username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     role ENUM('admin', 'user') DEFAULT 'user',
@@ -68,12 +58,13 @@ CREATE TABLE Bookings (
     user_id INT,
     port_id INT,
     ship_id INT,
-    booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    booking_date_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    booking_date_end TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     booking_status ENUM('pending', 'confirmed', 'canceled') DEFAULT 'pending',
     required_space INT,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (port_id) REFERENCES Ports(port_id) ON DELETE SET NULL,
-    FOREIGN KEY (ship_id) REFERENCES Ships(ship_id) ON DELETE SET NULL
+    FOREIGN KEY (port_id) REFERENCES Ports(port_id) ON DELETE CASCADE,
+    FOREIGN KEY (ship_id) REFERENCES Ships(ship_id) ON DELETE CASCADE
 );
 
 -- Container Table
@@ -84,6 +75,6 @@ CREATE TABLE Container (
     contents VARCHAR(255),
     ship_id INT,
     booking_id INT,
-    FOREIGN KEY (ship_id) REFERENCES Ships(ship_id) ON DELETE SET NULL,
+    FOREIGN KEY (ship_id) REFERENCES Ships(ship_id) ON DELETE CASCADE,
     FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id) ON DELETE CASCADE
 );

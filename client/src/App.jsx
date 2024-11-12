@@ -17,6 +17,11 @@ import ManageCountries from "./pages/Admin/ManageCountries";
 import ManageEmployees from "./pages/Admin/ManageEmployees";
 import ManageShips from "./pages/Admin/ManageShips";
 import ManageContainers from "./pages/Admin/ManageContainers";
+import BrowsePorts from "./pages/User/BrowsePorts"
+import BookPort from "./pages/User/BookPort";
+import ManageBooking from "./pages/User/ManageBooking";
+import Navbar from "./components/Navbar";
+import PageNotFound from "./pages/PageNotFound";
 
 function App() {
   const isAuthenticated = () => !!localStorage.getItem("authToken");
@@ -31,6 +36,7 @@ function App() {
         autoClose={1500}
       />
       <Router>
+        <Navbar />
         <Routes>
           <Route
             path="/"
@@ -76,8 +82,18 @@ function App() {
           <Route path="/admin/manage-countries" element={<ManageCountries />} />
           <Route path="/admin/manage-employees" element={<ManageEmployees />} />
           <Route path="/admin/manage-ships" element={<ManageShips />} />
-          <Route path="/admin/manage-containers" element={<ManageContainers />} />
-          <Route path="/profile" element={<ProfilePage />}/>
+          <Route
+            path="/admin/manage-containers"
+            element={<ManageContainers />}
+          />
+
+          <Route path="/user/browse-ports" element={<BrowsePorts />} />
+          <Route path="/user/book-port" element={<BookPort />} />
+          <Route path="/user/Manage-Bookings" element={<ManageBooking />} />
+
+          <Route path="/profile" element={<ProfilePage />} />
+
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Router>
     </div>

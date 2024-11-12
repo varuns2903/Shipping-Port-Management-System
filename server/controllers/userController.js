@@ -10,12 +10,26 @@ const UserController = {
       return res.status(400).json({ msg: "Please enter all fields" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const query =
-      "INSERT INTO Users (username, email, password, role) VALUES (?, ?, ?, ?)";
-    db.query(query, [username, email, hashedPassword, role], (err, result) => {
+    const checkUserQuery = "SELECT * FROM Users WHERE email = ?";
+    db.query(checkUserQuery, [email], async (err, result) => {
       if (err) throw err;
-      res.status(201).json({ id: result.insertId, username, email, role });
+
+      if (result.length > 0) {
+        return res.status(400).json({ msg: "Email is already in use" });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const query =
+        "INSERT INTO Users (username, email, password, role) VALUES (?, ?, ?, ?)";
+
+      db.query(
+        query,
+        [username, email, hashedPassword, role],
+        (err, result) => {
+          if (err) throw err;
+          res.status(201).json({ id: result.insertId, username, email, role });
+        }
+      );
     });
   },
 
