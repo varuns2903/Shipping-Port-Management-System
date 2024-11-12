@@ -127,36 +127,51 @@ function AdminDashboard() {
           {/* Quick Stats Section */}
           <div className="mt-4">
             <h3>Port Stats</h3>
-            <table className="table table-striped">
-              <thead>
-                <tr>
-                  <th>Port Name</th>
-                  <th>Capacity (TEU)</th>
-                  <th>Available Space (TEU)</th>
-                  <th>Utilization (%)</th>
-                  <th>Active Bookings</th>
-                  <th>Total Cargo Load (Tons)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.length > 0 ? (
-                  stats.map((stat) => (
-                    <tr key={stat.port_id}>
-                      <td>{stat.port_name}</td>
-                      <td>{stat.capacity}</td>
-                      <td>{stat.available_space}</td>
-                      <td>{parseFloat(stat.capacityUtilization).toFixed(2)}</td>
-                      <td>{stat.activeBookings}</td>
-                      <td>{stat.totalCargoLoad || 0}</td>
-                    </tr>
-                  ))
-                ) : (
+            <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+              <table
+                className="table table-striped"
+                style={{ position: "relative" }}
+              >
+                <thead
+                  className="table-dark"
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "#f8f9fa",
+                    zIndex: 1,
+                  }}
+                >
                   <tr>
-                    <td colSpan="6">No data available</td>
+                    <th>Port Name</th>
+                    <th>Capacity (TEU)</th>
+                    <th>Available Space (TEU)</th>
+                    <th>Utilization (%)</th>
+                    <th>Active Bookings</th>
+                    <th>Total Cargo Load (Tons)</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stats.length > 0 ? (
+                    stats.map((stat) => (
+                      <tr key={stat.port_id}>
+                        <td>{stat.port_name}</td>
+                        <td>{stat.capacity}</td>
+                        <td>{stat.available_space}</td>
+                        <td>
+                          {parseFloat(stat.capacityUtilization).toFixed(2)}
+                        </td>
+                        <td>{stat.activeBookings}</td>
+                        <td>{stat.totalCargoLoad || 0}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6">No data available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Activity Logs Section */}
@@ -168,6 +183,7 @@ function AdminDashboard() {
                 style={{ position: "relative" }}
               >
                 <thead
+                  className="table-dark"
                   style={{
                     position: "sticky",
                     top: 0,

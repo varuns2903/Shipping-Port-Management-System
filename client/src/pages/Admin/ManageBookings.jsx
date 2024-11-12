@@ -190,6 +190,7 @@ function ManageBookings() {
               <th className="text-center">Port</th>
               <th className="text-center">Ship</th>
               <th className="text-center">Booking Date</th>
+              <th className="text-center">Required Space</th>
               <th className="text-center">Status</th>
               <th className="text-center">Actions</th>
             </tr>
@@ -211,6 +212,7 @@ function ManageBookings() {
                   <td className="text-center">
                     {new Date(booking.booking_date).toLocaleDateString()}
                   </td>
+                  <td className="text-center">{booking.required_space}</td>
                   <td className="text-center">{booking.booking_status}</td>
                   <td className="text-center">
                     <button

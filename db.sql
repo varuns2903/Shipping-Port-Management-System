@@ -70,6 +70,7 @@ CREATE TABLE Bookings (
     ship_id INT,
     booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     booking_status ENUM('pending', 'confirmed', 'canceled') DEFAULT 'pending',
+    required_space INT,
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (port_id) REFERENCES Ports(port_id) ON DELETE SET NULL,
     FOREIGN KEY (ship_id) REFERENCES Ships(ship_id) ON DELETE SET NULL
