@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useLocation } from "react-router-dom";
+import Navbar from "../../components/Navbar";
 
 const BookPort = () => {
   const location = useLocation();
@@ -12,7 +13,8 @@ const BookPort = () => {
     user_id: "",
     port_id: "",
     ship_id: "",
-    booking_datetime: "", // Changed to booking_datetime
+    booking_date_start: "", // Changed to booking_date_start
+    booking_date_end: "", // Changed to booking_date_start
     ship_name: "",
     required_space: 0,
   });
@@ -61,7 +63,7 @@ const BookPort = () => {
         }
       } catch (error) {
         console.log(error);
-        
+
         setErrorMessage("Failed to fetch user ID or port details.");
       }
     };
@@ -79,7 +81,7 @@ const BookPort = () => {
         setShips(response.data);
       } catch (error) {
         console.log(error);
-        
+
         setErrorMessage("Failed to load ships.");
       }
     };
@@ -133,8 +135,8 @@ const BookPort = () => {
         setErrorMessage("");
       }
     } catch (error) {
-        console.log(error);
-        
+      console.log(error);
+
       setErrorMessage("Failed to check available space.");
     }
   };
@@ -149,24 +151,21 @@ const BookPort = () => {
     }
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/bookings/book",
-        bookingData
-      );
+      await axios.post("http://localhost:5000/api/bookings/book", bookingData);
       setSuccessMessage("Booking successful!");
       setErrorMessage("");
       setBookingData({
         port_id: "",
         ship_id: "",
-        booking_datetime: "", // Reset the datetime field
+        booking_date_start: "", // Reset the datetime field
         ship_name: "",
         required_space: 0,
         user_id: "",
       });
       setSelectedPortCapacity(null);
     } catch (error) {
-        console.log(error);
-        
+      console.log(error);
+
       setErrorMessage("Failed to book port. Please try again.");
       setSuccessMessage("");
     }
@@ -176,104 +175,125 @@ const BookPort = () => {
   const currentDateTime = new Date().toISOString().slice(0, 16);
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4">Book a Port</h2>
-      {successMessage && (
-        <div className="alert alert-success">{successMessage}</div>
-      )}
-      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-      <form
-        onSubmit={handleSubmit}
-        className="border border-dark p-4 bg-light shadow-sm rounded"
-      >
-        {/* Port Selection */}
-        <div className="mb-3">
-          <label className="form-label">Select Port</label>
-          <select
-            id="port"
-            name="port_id"
-            className="form-select"
-            value={bookingData.port_id}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="">Choose a port...</option>
-            {ports.map((port) => (
-              <option key={port.port_id} value={port.port_id}>
-                {port.port_name}
-              </option>
-            ))}
-          </select>
-          {selectedPortCapacity !== null && (
-            <small className="form-text text-muted">
-              Available Capacity: {selectedPortCapacity} cubic meters
-            </small>
-          )}
-        </div>
-
-        {/* Ship Selection */}
-        <div className="mb-3">
-          <label className="form-label">Select Ship</label>
-          <select
-            id="ship"
-            name="ship_id"
-            className="form-select"
-            value={bookingData.ship_id}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="">Choose a ship...</option>
-            {ships.length > 0 ? (
-              ships.map((ship) => (
-                <option key={ship.ship_id} value={ship.ship_id}>
-                  {ship.ship_name}
+    <>
+      <Navbar />
+      <div className="container mt-5">
+        <h2 className="mb-4">Book a Port</h2>
+        {successMessage && (
+          <div className="alert alert-success">{successMessage}</div>
+        )}
+        {errorMessage && (
+          <div className="alert alert-danger">{errorMessage}</div>
+        )}
+        <form
+          onSubmit={handleSubmit}
+          className="border border-dark p-4 bg-light shadow-sm rounded"
+        >
+          {/* Port Selection */}
+          <div className="mb-3">
+            <label className="form-label">Select Port</label>
+            <select
+              id="port"
+              name="port_id"
+              className="form-select"
+              value={bookingData.port_id}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Choose a port...</option>
+              {ports.map((port) => (
+                <option key={port.port_id} value={port.port_id}>
+                  {port.port_name}
                 </option>
-              ))
-            ) : (
-              <option disabled>No ships available</option>
+              ))}
+            </select>
+            {selectedPortCapacity !== null && (
+              <small className="form-text text-muted">
+                Available Capacity: {selectedPortCapacity} cubic meters
+              </small>
             )}
-          </select>
-        </div>
+          </div>
 
-        {/* Required Space */}
-        <div className="mb-3">
-          <label className="form-label">Required Space (in cubic meters)</label>
-          <input
-            type="number"
-            id="required_space"
-            name="required_space"
-            className="form-control"
-            value={bookingData.required_space}
-            onChange={(e) => {
-              handleInputChange(e);
-              checkAvailableSpace();
-            }}
-            min="1"
-            max={selectedPortCapacity || 0}
-            required
-          />
-        </div>
+          {/* Ship Selection */}
+          <div className="mb-3">
+            <label className="form-label">Select Ship</label>
+            <select
+              id="ship"
+              name="ship_id"
+              className="form-select"
+              value={bookingData.ship_id}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Choose a ship...</option>
+              {ships.length > 0 ? (
+                ships.map((ship) => (
+                  <option key={ship.ship_id} value={ship.ship_id}>
+                    {ship.ship_name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No ships available</option>
+              )}
+            </select>
+          </div>
 
-        {/* Booking Date and Time */}
-        <div className="mb-3">
-          <label className="form-label">Booking Date and Time</label>
-          <input
-            type="datetime-local"
-            id="booking_datetime"
-            name="booking_datetime"
-            className="form-control"
-            value={bookingData.booking_datetime}
-            onChange={handleInputChange}
-            min={currentDateTime}
-            required
-          />
-        </div>
+          {/* Required Space */}
+          <div className="mb-3">
+            <label className="form-label">
+              Required Space (in cubic meters)
+            </label>
+            <input
+              type="number"
+              id="required_space"
+              name="required_space"
+              className="form-control"
+              value={bookingData.required_space}
+              onChange={(e) => {
+                handleInputChange(e);
+                checkAvailableSpace();
+              }}
+              min="1"
+              max={selectedPortCapacity || 0}
+              required
+            />
+          </div>
 
-        <button type="submit" className="btn btn-primary">
-          Book Port
-        </button>
-      </form>
-    </div>
+          {/* Booking Date and Time */}
+          <div className="mb-3">
+            <label className="form-label">From Booking Date</label>
+            <input
+              type="datetime-local"
+              id="booking_date_start"
+              name="booking_date_start"
+              className="form-control"
+              value={bookingData.booking_date_start}
+              onChange={handleInputChange}
+              min={currentDateTime}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">To Booking Date</label>
+            <input
+              type="datetime-local"
+              id="booking_date_end"
+              name="booking_date_end"
+              className="form-control"
+              value={bookingData.booking_date_end}
+              onChange={handleInputChange}
+              min={currentDateTime}
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary">
+            Book Port
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 

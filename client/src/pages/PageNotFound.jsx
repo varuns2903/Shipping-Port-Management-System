@@ -7,7 +7,7 @@ const PageNotFound = () => {
       <p className="lead">
         Oops! The page you&apos;re looking for doesn&apos;t exist.
       </p>
-      <Link to="/" className="btn btn-outline-primary mt-3">
+      <Link to="/" className="btn btn-outline-secondary mt-3">
         Return to Home
       </Link>
     </div>

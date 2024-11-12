@@ -29,8 +29,8 @@ exports.bookPort = (req, res) => {
     }
 
     const bookingQuery = `
-      INSERT INTO Bookings (user_id, port_id, ship_id, booking_status, booking_date, required_space) 
-      VALUES (?, ?, ?, 'pending', ?, ?)
+      INSERT INTO Bookings (user_id, port_id, ship_id, booking_status, booking_date_start, booking_date_end, required_space) 
+      VALUES (?, ?, ?, 'pending', ?, ?, ?)
     `;
     connection.query(
       bookingQuery,
@@ -63,7 +63,7 @@ exports.getRecentBookings = (req, res) => {
   const query = `
     SELECT * FROM Bookings 
     WHERE user_id = ? 
-    ORDER BY booking_date DESC
+    ORDER BY booking_date_start DESC
   `;
 
   connection.query(query, [userId], (err, results) => {
@@ -139,7 +139,8 @@ exports.getAllBookings = (req, res) => {
     SELECT 
       Bookings.booking_id,
       Bookings.booking_status,
-      Bookings.booking_date,
+      Bookings.booking_date_start,
+      Bookings.booking_date_end,
       Bookings.required_space,
       Ports.port_name,
       Ports.location,
@@ -155,7 +156,7 @@ exports.getAllBookings = (req, res) => {
     WHERE 
       Bookings.user_id = ?
     ORDER BY 
-      Bookings.booking_date DESC;
+      Bookings.booking_date_start DESC;
   `;
 
   connection.query(query, [userId], (err, results) => {

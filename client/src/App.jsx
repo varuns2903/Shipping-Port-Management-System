@@ -20,7 +20,6 @@ import ManageContainers from "./pages/Admin/ManageContainers";
 import BrowsePorts from "./pages/User/BrowsePorts"
 import BookPort from "./pages/User/BookPort";
 import ManageBooking from "./pages/User/ManageBooking";
-import Navbar from "./components/Navbar";
 import PageNotFound from "./pages/PageNotFound";
 
 function App() {
@@ -36,7 +35,6 @@ function App() {
         autoClose={1500}
       />
       <Router>
-        <Navbar />
         <Routes>
           <Route
             path="/"

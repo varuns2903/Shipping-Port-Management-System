@@ -19,12 +19,12 @@ exports.getUserShipments = (req, res) => {
 exports.getUpcomingShipments = (req, res) => {
   const userId = req.params.userId;
   const query = `
-      SELECT  Ships.*, Bookings.booking_date
+      SELECT  Ships.*, Bookings.booking_date_start, Bookings.booking_date_end
       FROM Ships
       JOIN Bookings ON Ships.ship_id = Bookings.ship_id
       WHERE Bookings.user_id = ? AND Bookings.booking_status = 'pending' 
-            AND Bookings.booking_date > NOW()
-      ORDER BY Bookings.booking_date ASC
+            AND Bookings.booking_date_start > NOW()
+      ORDER BY Bookings.booking_date_start ASC
   `;
   connection.query(query, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -42,7 +42,6 @@ exports.getContainerStatus = (req, res) => {
   `;
   connection.query(query, [userId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
-    console.log(results);
     res.json(results.length ? results : []);
   });
 };

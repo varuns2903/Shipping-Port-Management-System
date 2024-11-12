@@ -762,12 +762,12 @@ const adminDashboardController = {
     const activityQuery = `
       (SELECT 
         'New Booking' AS activity, 
-        Bookings.booking_date AS timestamp, 
+        Bookings.booking_date_start AS timestamp,
         Ports.port_name,
         Bookings.booking_id AS reference_id
        FROM Bookings
        JOIN Ports ON Bookings.port_id = Ports.port_id
-       ORDER BY Bookings.booking_date DESC)
+       ORDER BY Bookings.booking_date_start DESC)
       UNION ALL
       (SELECT 
         'User Registration' AS activity, 

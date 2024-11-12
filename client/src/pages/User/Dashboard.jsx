@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Navbar from "../../components/Navbar";
 
 function UserDashboard() {
   const [userId, setUserId] = useState(null);
@@ -18,7 +19,7 @@ function UserDashboard() {
             headers: { Authorization: token },
           }
         );
-        setUserId(response.data.data.user_id);
+        setUserId(response.data.data.user_id);        
       } catch (error) {
         console.error("Error fetching user ID:", error);
       }
@@ -27,10 +28,13 @@ function UserDashboard() {
   }, []);
 
   useEffect(() => {
+    const token = localStorage.getItem("authToken");
     if (userId) {
       // Fetch recent bookings
       axios
-        .get(`/api/bookings/recent/${userId}`)
+        .get(`http://localhost:5000/api/bookings/recent/${userId}`, {
+          headers: { Authorization: token },
+        })
         .then((response) => setRecentBookings(response.data))
         .catch((error) =>
           console.error("Error fetching recent bookings:", error)
@@ -38,7 +42,9 @@ function UserDashboard() {
 
       // Fetch upcoming shipments
       axios
-        .get(`/api/shipments/upcoming/${userId}`)
+        .get(`http://localhost:5000/api/shipments/upcoming/${userId}`, {
+          headers: { Authorization: token },
+        })
         .then((response) => setUpcomingShipments(response.data))
         .catch((error) =>
           console.error("Error fetching upcoming shipments:", error)
@@ -46,7 +52,9 @@ function UserDashboard() {
 
       // Fetch container statuses
       axios
-        .get(`/api/shipments/container-status/${userId}`)
+        .get(`http://localhost:5000/api/shipments/container-status/${userId}`, {
+          headers: { Authorization: token },
+        })
         .then((response) => setContainerStatuses(response.data))
         .catch((error) =>
           console.error("Error fetching container statuses:", error)
@@ -55,143 +63,162 @@ function UserDashboard() {
   }, [userId]);
 
   return (
-    <div className="container mt-5">
-      <h1 className="text-center mb-4 font-weight-bold">User Dashboard</h1>
+    <>
+      <Navbar />
+      <div className="container mt-5">
+        <h1 className="text-center mb-4 font-weight-bold">User Dashboard</h1>
 
-      {/* Recent Bookings Table */}
-      <div className="mb-5">
-        <h3 className="mb-3">Recent Bookings</h3>
-        <div
-          className="table-responsive"
-          style={{ maxHeight: "200px", overflowY: "auto" }}
-        >
-          <table
-            className="table table-bordered table-striped table-hover"
-            style={{ position: "relative" }}
+        {/* Recent Bookings Table */}
+        <div className="mb-5">
+          <h3 className="mb-3">Recent Bookings</h3>
+          <div
+            className="table-responsive"
+            style={{ maxHeight: "200px", overflowY: "auto" }}
           >
-            <thead
-              className="table-dark"
-              style={{ position: "sticky", top: 0 }}
+            <table
+              className="table table-bordered table-striped table-hover"
+              style={{ position: "relative" }}
             >
-              <tr>
-                <th>Booking ID</th>
-                <th>Status</th>
-                <th>Booking Date</th>
-                <th>Required Space</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentBookings.length > 0 ? (
-                recentBookings.slice(0, 5).map((booking) => (
-                  <tr key={booking.booking_id}>
-                    <td>{booking.booking_id}</td>
-                    <td>{booking.booking_status}</td>
-                    <td>
-                      {new Date(booking.booking_date).toLocaleDateString()}
+              <thead
+                className="table-dark"
+                style={{ position: "sticky", top: 0 }}
+              >
+                <tr>
+                  <th>Booking ID</th>
+                  <th>Status</th>
+                  <th>From Booking Date</th>
+                  <th>To Booking Date</th>
+                  <th>Required Space</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentBookings.length > 0 ? (
+                  recentBookings.slice(0, 5).map((booking) => (
+                    <tr key={booking.booking_id}>
+                      <td>{booking.booking_id}</td>
+                      <td>{booking.booking_status}</td>
+                      <td>
+                        {new Date(
+                          booking.booking_date_start
+                        ).toLocaleDateString()}
+                      </td>
+                      <td>
+                        {new Date(
+                          booking.booking_date_end
+                        ).toLocaleDateString()}
+                      </td>
+                      <td>{booking.required_space}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center">
+                      No recent bookings available.
                     </td>
-                    <td>{booking.required_space}</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="text-center">
-                    No recent bookings available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* Upcoming Shipments Table */}
-      <div className="mb-5">
-        <h3 className="mb-3">Upcoming Shipments</h3>
-        <div
-          className="table-responsive"
-          style={{ maxHeight: "200px", overflowY: "auto" }}
-        >
-          <table
-            className="table table-bordered table-striped table-hover"
-            style={{ position: "relative" }}
+        {/* Upcoming Shipments Table */}
+        <div className="mb-5">
+          <h3 className="mb-3">Upcoming Shipments</h3>
+          <div
+            className="table-responsive"
+            style={{ maxHeight: "200px", overflowY: "auto" }}
           >
-            <thead
-              className="table-dark "
-              style={{ position: "sticky", top: 0 }}
+            <table
+              className="table table-bordered table-striped table-hover"
+              style={{ position: "relative" }}
             >
-              <tr>
-                <th>Ship ID</th>
-                <th>Ship Name</th>
-                <th> Date</th>
-                <th>Owner</th>
-              </tr>
-            </thead>
-            <tbody>
-              {upcomingShipments.length > 0 ? (
-                upcomingShipments.slice(0, 5).map((shipment) => (
-                  <tr key={shipment.ship_id}>
-                    <td>{shipment.ship_id}</td>
-                    <td>{shipment.ship_name}</td>
-                    <td>
-                      {new Date(shipment.booking_date).toLocaleDateString()}
+              <thead
+                className="table-dark "
+                style={{ position: "sticky", top: 0 }}
+              >
+                <tr>
+                  <th>Ship ID</th>
+                  <th>Ship Name</th>
+                  <th>From Date</th>
+                  <th>To Date</th>
+                  <th>Owner</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcomingShipments.length > 0 ? (
+                  upcomingShipments.slice(0, 5).map((shipment) => (
+                    <tr key={shipment.ship_id}>
+                      <td>{shipment.ship_id}</td>
+                      <td>{shipment.ship_name}</td>
+                      <td>
+                        {new Date(
+                          shipment.booking_date_start
+                        ).toLocaleDateString()}
+                      </td>
+                      <td>
+                        {new Date(
+                          shipment.booking_date_end
+                        ).toLocaleDateString()}
+                      </td>
+                      <td>{shipment.owner}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center">
+                      No upcoming shipments available.
                     </td>
-                    <td>{shipment.owner}</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="text-center">
-                    No upcoming shipments available.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
 
-      {/* Container Statuses Table */}
-      <div className="mb-5">
-        <h3 className="mb-3">Container Info</h3>
-        <div
-          className="table-responsive"
-          style={{ maxHeight: "200px", overflowY: "auto" }}
-        >
-          <table
-            className="table table-bordered table-striped table-hover"
-            style={{ position: "relative" }}
+        {/* Container Statuses Table */}
+        <div className="mb-5">
+          <h3 className="mb-3">Container Info</h3>
+          <div
+            className="table-responsive"
+            style={{ maxHeight: "200px", overflowY: "auto" }}
           >
-            <thead
-              className="table-dark"
-              style={{ position: "sticky", top: 0 }}
+            <table
+              className="table table-bordered table-striped table-hover"
+              style={{ position: "relative" }}
             >
-              <tr>
-                <th>Container ID</th>
-                <th>Container Type</th>
-                <th>Weight</th>
-              </tr>
-            </thead>
-            <tbody>
-              {containerStatuses.length > 0 ? (
-                containerStatuses.slice(0, 5).map((container) => (
-                  <tr key={container.container_id}>
-                    <td>{container.container_id}</td>
-                    <td>{container.container_type}</td>
-                    <td>{container.weight}</td>
-                  </tr>
-                ))
-              ) : (
+              <thead
+                className="table-dark"
+                style={{ position: "sticky", top: 0 }}
+              >
                 <tr>
-                  <td colSpan="3" className="text-center">
-                    No container info available.
-                  </td>
+                  <th>Container ID</th>
+                  <th>Container Type</th>
+                  <th>Weight</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {containerStatuses.length > 0 ? (
+                  containerStatuses.slice(0, 5).map((container) => (
+                    <tr key={container.container_id}>
+                      <td>{container.container_id}</td>
+                      <td>{container.container_type}</td>
+                      <td>{container.weight}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="text-center">
+                      No container info available.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

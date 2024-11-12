@@ -17,18 +17,6 @@ CREATE TABLE Ports (
     FOREIGN KEY (country_id) REFERENCES Country(country_id) ON DELETE CASCADE
 );
 
--- Employee Table
-CREATE TABLE Employee (
-    employee_id INT PRIMARY KEY AUTO_INCREMENT,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50),
-    position VARCHAR(100),
-    salary DECIMAL(10, 2),
-    hire_date DATE,
-    port_id INT,
-    FOREIGN KEY (port_id) REFERENCES Ports(port_id) ON DELETE SET NULL
-);
-
 -- Ships Table
 CREATE TABLE Ships (
     ship_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -39,6 +27,18 @@ CREATE TABLE Ships (
     country_id INT,
     port_id INT,
     FOREIGN KEY (country_id) REFERENCES Country(country_id) ON DELETE SET NULL,
+    FOREIGN KEY (port_id) REFERENCES Ports(port_id) ON DELETE SET NULL
+);
+
+-- Employee Table
+CREATE TABLE Employee (
+    employee_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50),
+    position VARCHAR(100),
+    salary DECIMAL(10, 2),
+    hire_date DATE,
+    port_id INT,
     FOREIGN KEY (port_id) REFERENCES Ports(port_id) ON DELETE SET NULL
 );
 

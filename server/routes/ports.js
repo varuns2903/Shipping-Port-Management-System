@@ -1,4 +1,3 @@
-// routes/portRoutes.js
 const express = require("express");
 const PortController = require("../controllers/portController");
 const router = express.Router();

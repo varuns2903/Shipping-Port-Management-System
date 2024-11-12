@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Navbar from "../../components/Navbar";
 
 function ManageEmployees() {
   const [employees, setEmployees] = useState([]);
@@ -31,7 +32,7 @@ function ManageEmployees() {
     const headers = { Authorization: token };
 
     try {
-      const response = await axios.get("http://localhost:5000/api/employees", {
+      const response = await axios.get("http://localhost:5000/api/admin/employees", {
         headers,
       });
       setEmployees(response.data.data);
@@ -46,7 +47,7 @@ function ManageEmployees() {
     const headers = { Authorization: token };
 
     try {
-      const response = await axios.get("http://localhost:5000/api/ports", {
+      const response = await axios.get("http://localhost:5000/api/admin/ports", {
         headers,
       });
       setPorts(response.data.data);
@@ -69,7 +70,7 @@ function ManageEmployees() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/employees",
+        "http://localhost:5000/api/admin/employees",
         employeeToAdd,
         { headers }
       );
@@ -104,7 +105,7 @@ function ManageEmployees() {
 
       try {
         await axios.delete(
-          `http://localhost:5000/api/employees/${employeeId}`,
+          `http://localhost:5000/api/admin/employees/${employeeId}`,
           { headers }
         );
         setEmployees(
@@ -124,7 +125,7 @@ function ManageEmployees() {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/employees/${selectedEmployee.employee_id}`,
+        `http://localhost:5000/api/admin/employees/${selectedEmployee.employee_id}`,
         selectedEmployee,
         { headers }
       );
@@ -168,358 +169,365 @@ function ManageEmployees() {
   const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Manage Employees</h2>
+    <>
+      <Navbar />
+      <div className="container mt-4">
+        <h2 className="mb-4">Manage Employees</h2>
 
-      <input
-        type="text"
-        className="form-control mb-4"
-        placeholder="Search by ID, Name, Position, or Port Name"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
+        <input
+          type="text"
+          className="form-control mb-4"
+          placeholder="Search by ID, Name, Position, or Port Name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
 
-      <button
-        className="btn btn-dark mb-4"
-        onClick={() => setShowAddModal(true)}
-      >
-        Add Employee
-      </button>
+        <button
+          className="btn btn-dark mb-4"
+          onClick={() => setShowAddModal(true)}
+        >
+          Add Employee
+        </button>
 
-      <div className="table-responsive">
-        <table className="table table-striped table-bordered table-hover">
-          <thead className="table-dark">
-            <tr>
-              <th className="text-center">Employee ID</th>
-              <th className="text-center">First Name</th>
-              <th className="text-center">Last Name</th>
-              <th className="text-center">Position</th>
-              <th className="text-center">Salary</th>
-              <th className="text-center">Hire Date</th>
-              <th className="text-center">Port Name</th>
-              <th className="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentEmployees.length > 0 ? (
-              currentEmployees.map((employee) => (
-                <tr key={employee.employee_id}>
-                  <td className="text-center">{employee.employee_id}</td>
-                  <td className="text-center">{employee.first_name}</td>
-                  <td className="text-center">{employee.last_name}</td>
-                  <td className="text-center">{employee.position}</td>
-                  <td className="text-center">₹{employee.salary}</td>
-                  <td className="text-center">{employee.hire_date}</td>
-                  <td className="text-center">{employee.port_name}</td>
-                  <td className="text-center">
-                    <button
-                      className="btn btn-dark btn-sm me-2"
-                      onClick={() => handleEditClick(employee)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDeleteClick(employee.employee_id)}
-                    >
-                      Delete
-                    </button>
+        <div className="table-responsive">
+          <table className="table table-striped table-bordered table-hover">
+            <thead className="table-dark">
+              <tr>
+                <th className="text-center">Employee ID</th>
+                <th className="text-center">First Name</th>
+                <th className="text-center">Last Name</th>
+                <th className="text-center">Position</th>
+                <th className="text-center">Salary</th>
+                <th className="text-center">Hire Date</th>
+                <th className="text-center">Port Name</th>
+                <th className="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentEmployees.length > 0 ? (
+                currentEmployees.map((employee) => (
+                  <tr key={employee.employee_id}>
+                    <td className="text-center">{employee.employee_id}</td>
+                    <td className="text-center">{employee.first_name}</td>
+                    <td className="text-center">{employee.last_name}</td>
+                    <td className="text-center">{employee.position}</td>
+                    <td className="text-center">₹{employee.salary}</td>
+                    <td className="text-center">{new Date(employee.hire_date).toLocaleDateString()}</td>
+                    <td className="text-center">{employee.port_name}</td>
+                    <td className="text-center">
+                      <button
+                        className="btn btn-dark btn-sm me-2"
+                        onClick={() => handleEditClick(employee)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeleteClick(employee.employee_id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center">
+                    No employees found
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-center">
-                  No employees found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <nav>
-          <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-              <button
-                onClick={() => setCurrentPage(currentPage - 1)}
-                className="page-link bg-transparent text-dark border-0"
-              >
-                Prev
-              </button>
-            </li>
-            {Array.from({ length: totalPages }, (_, index) => (
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <nav>
+            <ul className="pagination justify-content-center">
               <li
-                key={index}
+                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+              >
+                <button
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  className="page-link bg-transparent text-dark border-0"
+                >
+                  Prev
+                </button>
+              </li>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <li
+                  key={index}
+                  className={`page-item ${
+                    currentPage === index + 1 ? "active" : ""
+                  }`}
+                >
+                  <button
+                    onClick={() => setCurrentPage(index + 1)}
+                    className="page-link bg-transparent border-0"
+                  >
+                    {index + 1}
+                  </button>
+                </li>
+              ))}
+              <li
                 className={`page-item ${
-                  currentPage === index + 1 ? "active" : ""
+                  currentPage === totalPages ? "disabled" : ""
                 }`}
               >
                 <button
-                  onClick={() => setCurrentPage(index + 1)}
-                  className="page-link bg-transparent border-0"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  className="page-link bg-transparent text-dark border-0"
                 >
-                  {index + 1}
+                  Next
                 </button>
               </li>
-            ))}
-            <li
-              className={`page-item ${
-                currentPage === totalPages ? "disabled" : ""
-              }`}
-            >
-              <button
-                onClick={() => setCurrentPage(currentPage + 1)}
-                className="page-link bg-transparent text-dark border-0"
-              >
-                Next
-              </button>
-            </li>
-          </ul>
-        </nav>
-      )}
+            </ul>
+          </nav>
+        )}
 
-      {/* Edit Modal */}
-      {showEditModal && selectedEmployee && (
-        <div className="modal fade show" style={{ display: "block" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Employee</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowEditModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label htmlFor="firstName" className="form-label">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="first_name"
-                    className="form-control"
-                    value={selectedEmployee.first_name}
-                    onChange={handleChange}
-                  />
+        {/* Edit Modal */}
+        {showEditModal && selectedEmployee && (
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Edit Employee</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowEditModal(false)}
+                  ></button>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="lastName" className="form-label">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="last_name"
-                    className="form-control"
-                    value={selectedEmployee.last_name}
-                    onChange={handleChange}
-                  />
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="firstName" className="form-label">
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="first_name"
+                      className="form-control"
+                      value={selectedEmployee.first_name}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="lastName" className="form-label">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="last_name"
+                      className="form-control"
+                      value={selectedEmployee.last_name}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="position" className="form-label">
+                      Position
+                    </label>
+                    <input
+                      type="text"
+                      id="position"
+                      name="position"
+                      className="form-control"
+                      value={selectedEmployee.position}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="salary" className="form-label">
+                      Salary
+                    </label>
+                    <input
+                      type="number"
+                      id="salary"
+                      name="salary"
+                      className="form-control"
+                      value={selectedEmployee.salary}
+                      onChange={handleChange}
+                      min={0}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="hireDate" className="form-label">
+                      Hire Date
+                    </label>
+                    <input
+                      type="date"
+                      id="hireDate"
+                      name="hire_date"
+                      className="form-control"
+                      value={selectedEmployee.hire_date}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="portId" className="form-label">
+                      Port Name
+                    </label>
+                    <select
+                      id="portId"
+                      name="port_id"
+                      className="form-select"
+                      value={selectedEmployee.port_id}
+                      onChange={handleChange}
+                    >
+                      {ports.map((port) => (
+                        <option key={port.port_id} value={port.port_id}>
+                          {port.port_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="position" className="form-label">
-                    Position
-                  </label>
-                  <input
-                    type="text"
-                    id="position"
-                    name="position"
-                    className="form-control"
-                    value={selectedEmployee.position}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="salary" className="form-label">
-                    Salary
-                  </label>
-                  <input
-                    type="number"
-                    id="salary"
-                    name="salary"
-                    className="form-control"
-                    value={selectedEmployee.salary}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="hireDate" className="form-label">
-                    Hire Date
-                  </label>
-                  <input
-                    type="date"
-                    id="hireDate"
-                    name="hire_date"
-                    className="form-control"
-                    value={selectedEmployee.hire_date}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="portId" className="form-label">
-                    Port Name
-                  </label>
-                  <select
-                    id="portId"
-                    name="port_id"
-                    className="form-select"
-                    value={selectedEmployee.port_id}
-                    onChange={handleChange}
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
                   >
-                    {ports.map((port) => (
-                      <option key={port.port_id} value={port.port_id}>
-                        {port.port_name}
-                      </option>
-                    ))}
-                  </select>
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveChanges}
+                  >
+                    Save Changes
+                  </button>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSaveChanges}
-                >
-                  Save Changes
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Add Employee Modal */}
-      {showAddModal && (
-        <div className="modal fade show" style={{ display: "block" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Add New Employee</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowAddModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label htmlFor="firstName" className="form-label">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="first_name"
-                    className="form-control"
-                    value={newEmployee.first_name}
-                    onChange={handleNewEmployeeChange}
-                  />
+        {/* Add Employee Modal */}
+        {showAddModal && (
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Add New Employee</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowAddModal(false)}
+                  ></button>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="lastName" className="form-label">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="last_name"
-                    className="form-control"
-                    value={newEmployee.last_name}
-                    onChange={handleNewEmployeeChange}
-                  />
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="firstName" className="form-label">
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="first_name"
+                      className="form-control"
+                      value={newEmployee.first_name}
+                      onChange={handleNewEmployeeChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="lastName" className="form-label">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="last_name"
+                      className="form-control"
+                      value={newEmployee.last_name}
+                      onChange={handleNewEmployeeChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="position" className="form-label">
+                      Position
+                    </label>
+                    <input
+                      type="text"
+                      id="position"
+                      name="position"
+                      className="form-control"
+                      value={newEmployee.position}
+                      onChange={handleNewEmployeeChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="salary" className="form-label">
+                      Salary
+                    </label>
+                    <input
+                      type="number"
+                      id="salary"
+                      name="salary"
+                      className="form-control"
+                      value={newEmployee.salary}
+                      onChange={handleNewEmployeeChange}
+                      min={0}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="hireDate" className="form-label">
+                      Hire Date
+                    </label>
+                    <input
+                      type="date"
+                      id="hireDate"
+                      name="hire_date"
+                      className="form-control"
+                      value={newEmployee.hire_date}
+                      onChange={handleNewEmployeeChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="portId" className="form-label">
+                      Port Name
+                    </label>
+                    <select
+                      id="portId"
+                      name="port_id"
+                      className="form-select"
+                      value={newEmployee.port_id}
+                      onChange={handleNewEmployeeChange}
+                    >
+                      <option value="">Select Port</option>
+                      {ports.map((port) => (
+                        <option key={port.port_id} value={port.port_id}>
+                          {port.port_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="position" className="form-label">
-                    Position
-                  </label>
-                  <input
-                    type="text"
-                    id="position"
-                    name="position"
-                    className="form-control"
-                    value={newEmployee.position}
-                    onChange={handleNewEmployeeChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="salary" className="form-label">
-                    Salary
-                  </label>
-                  <input
-                    type="number"
-                    id="salary"
-                    name="salary"
-                    className="form-control"
-                    value={newEmployee.salary}
-                    onChange={handleNewEmployeeChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="hireDate" className="form-label">
-                    Hire Date
-                  </label>
-                  <input
-                    type="date"
-                    id="hireDate"
-                    name="hire_date"
-                    className="form-control"
-                    value={newEmployee.hire_date}
-                    onChange={handleNewEmployeeChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="portId" className="form-label">
-                    Port Name
-                  </label>
-                  <select
-                    id="portId"
-                    name="port_id"
-                    className="form-select"
-                    value={newEmployee.port_id}
-                    onChange={handleNewEmployeeChange}
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowAddModal(false)}
                   >
-                    <option value="">Select Port</option>
-                    {ports.map((port) => (
-                      <option key={port.port_id} value={port.port_id}>
-                        {port.port_name}
-                      </option>
-                    ))}
-                  </select>
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleAddEmployee}
+                  >
+                    Add Employee
+                  </button>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowAddModal(false)}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleAddEmployee}
-                >
-                  Add Employee
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
 

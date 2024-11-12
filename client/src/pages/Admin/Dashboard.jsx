@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import DashboardCard from "../../components/DashboardCard";
+import Navbar from "../../components/Navbar";
 
 function AdminDashboard() {
   const [userCount, setUserCount] = useState(0);
@@ -13,63 +15,68 @@ function AdminDashboard() {
   const [containerCount, setContainerCount] = useState(0);
   const [stats, setStats] = useState([]);
   const [activityLogs, setActivityLogs] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("authToken");
+      const role = localStorage.getItem("role");
+      if (role !== "admin") {
+        navigate("/login");
+      }
       const headers = { Authorization: token };
 
       try {
-        const users = await axios.get("http://localhost:5000/api/users", {
+        const users = await axios.get("http://localhost:5000/api/admin/users", {
           headers,
         });
         setUserCount(users.data.data.length);
 
-        const ports = await axios.get("http://localhost:5000/api/ports", {
+        const ports = await axios.get("http://localhost:5000/api/admin/ports", {
           headers,
         });
         setPortCount(ports.data.data.length);
 
-        const bookings = await axios.get("http://localhost:5000/api/bookings", {
+        const bookings = await axios.get("http://localhost:5000/api/admin/bookings", {
           headers,
         });
         setBookingCount(bookings.data.data.length);
 
         const countries = await axios.get(
-          "http://localhost:5000/api/countries",
+          "http://localhost:5000/api/admin/countries",
           { headers }
         );
         setCountryCount(countries.data.data.length);
 
         const employees = await axios.get(
-          "http://localhost:5000/api/employees",
+          "http://localhost:5000/api/admin/employees",
           { headers }
         );
         setEmployeeCount(employees.data.data.length);
 
-        const ships = await axios.get("http://localhost:5000/api/ships", {
+        const ships = await axios.get("http://localhost:5000/api/admin/ships", {
           headers,
         });
         setShipCount(ships.data.data.length);
 
         const containers = await axios.get(
-          "http://localhost:5000/api/containers",
+          "http://localhost:5000/api/admin/containers",
           { headers }
         );
         setContainerCount(containers.data.data.length);
 
         const statsResponse = await axios.get(
-          "http://localhost:5000/api/stats",
+          "http://localhost:5000/api/admin/stats",
           { headers }
         );
         setStats(statsResponse.data.data);
 
-        const logs = await axios.get("http://localhost:5000/api/activityLogs", {
+        const logs = await axios.get("http://localhost:5000/api/admin/activityLogs", {
           headers,
         });
         setActivityLogs(logs.data.data);
       } catch (error) {
-        toast.error(error.response.data.msg);
+        toast.error(error.response);
         console.error("Error fetching data", error.response || error);
       }
     };
@@ -80,6 +87,7 @@ function AdminDashboard() {
   return (
     <div className="d-flex">
       <div className="flex-grow-1">
+        <Navbar />
         <div className="container mt-4">
           <h2>Admin Dashboard</h2>
 

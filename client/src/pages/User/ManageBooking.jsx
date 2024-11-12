@@ -4,6 +4,7 @@ import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Navbar from "../../components/Navbar";
 
 const ManageBooking = () => {
   const [bookings, setBookings] = useState([]);
@@ -64,55 +65,61 @@ const ManageBooking = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4">Manage Your Bookings</h2>
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-      {bookings.length === 0 ? (
-        <p>No bookings available.</p>
-      ) : (
-        <table className="table table-bordered table-striped">
-          <thead className="table-dark">
-            <tr>
-              <th>Booking ID</th>
-              <th>Port Name</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Required Space</th> {/* New Column */}
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((booking) => (
-              <tr key={booking.booking_id}>
-                <td>{booking.booking_id}</td>
-                <td>{booking.port_name}</td>
-                <td>{booking.booking_status}</td>
-                <td>{new Date(booking.booking_date).toLocaleDateString()}</td>
-                <td>{booking.required_space} m³</td>{" "}
-                {/* Display required_space */}
-                <td>
-                  {booking.booking_status === "pending" ? (
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDelete(booking.booking_id)}
-                    >
-                      Cancel Booking
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-danger btn-sm"
-                      disabled
-                    >
-                      Cancel Booking
-                    </button>
-                  )}
-                </td>
+    <>
+      <Navbar />
+      <div className="container mt-5">
+        <h2 className="mb-4">Manage Your Bookings</h2>
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+        {bookings.length === 0 ? (
+          <p>No bookings available.</p>
+        ) : (
+          <table className="table table-bordered table-striped">
+            <thead className="table-dark">
+              <tr>
+                <th>Booking ID</th>
+                <th>Port Name</th>
+                <th>Status</th>
+                <th>From Date</th>
+                <th>To Date</th>
+                <th>Required Space</th> {/* New Column */}
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+            </thead>
+            <tbody>
+              {bookings.map((booking) => (
+                <tr key={booking.booking_id}>
+                  <td>{booking.booking_id}</td>
+                  <td>{booking.port_name}</td>
+                  <td>{booking.booking_status}</td>
+                  <td>
+                    {new Date(booking.booking_date_start).toLocaleDateString()}
+                  </td>
+                  <td>
+                    {new Date(booking.booking_date_end).toLocaleDateString()}
+                  </td>
+                  <td>{booking.required_space} m³</td>{" "}
+                  {/* Display required_space */}
+                  <td>
+                    {booking.booking_status === "pending" ? (
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDelete(booking.booking_id)}
+                      >
+                        Cancel Booking
+                      </button>
+                    ) : (
+                      <button className="btn btn-danger btn-sm" disabled>
+                        Cancel Booking
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
   );
 };
 

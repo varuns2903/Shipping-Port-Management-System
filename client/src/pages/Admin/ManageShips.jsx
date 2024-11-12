@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Navbar from "../../components/Navbar";
 
 function ManageShips() {
   const [ships, setShips] = useState([]);
@@ -55,7 +56,7 @@ function ManageShips() {
     const headers = { Authorization: token };
 
     try {
-      const response = await axios.get("http://localhost:5000/api/ships", {
+      const response = await axios.get("http://localhost:5000/api/admin/ships", {
         headers,
       });
       setShips(response.data.data);
@@ -70,7 +71,7 @@ function ManageShips() {
     const headers = { Authorization: token };
 
     try {
-      const response = await axios.get("http://localhost:5000/api/countries", {
+      const response = await axios.get("http://localhost:5000/api/admin/countries", {
         headers,
       });
       setCountries(response.data.data);
@@ -85,7 +86,7 @@ function ManageShips() {
     const headers = { Authorization: token };
 
     try {
-      const response = await axios.get("http://localhost:5000/api/ports", {
+      const response = await axios.get("http://localhost:5000/api/admin/ports", {
         headers,
       });
       setPorts(response.data.data);
@@ -106,7 +107,7 @@ function ManageShips() {
       const headers = { Authorization: token };
 
       try {
-        await axios.delete(`http://localhost:5000/api/ships/${shipId}`, {
+        await axios.delete(`http://localhost:5000/api/admin/ships/${shipId}`, {
           headers,
         });
         setShips(ships.filter((ship) => ship.ship_id !== shipId));
@@ -124,7 +125,7 @@ function ManageShips() {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/ships/${selectedShip.ship_id}`,
+        `http://localhost:5000/api/admin/ships/${selectedShip.ship_id}`,
         {
           ship_name: selectedShip.ship_name,
           capacity: selectedShip.capacity,
@@ -155,7 +156,7 @@ function ManageShips() {
     const headers = { Authorization: token };
 
     try {
-      await axios.post("http://localhost:5000/api/ships", newShip, { headers });
+      await axios.post("http://localhost:5000/api/admin/ships", newShip, { headers });
 
       toast.success("New ship added successfully");
       fetchShips();
@@ -177,379 +178,386 @@ function ManageShips() {
   const totalPages = Math.ceil(filteredShips.length / shipsPerPage);
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Manage Ships</h2>
+    <>
+      <Navbar />
+      <div className="container mt-4">
+        <h2 className="mb-4">Manage Ships</h2>
 
-      <input
-        type="text"
-        className="form-control mb-3"
-        placeholder="Search by Ship ID, Name, Registration Number, Country, or Port"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
+        <input
+          type="text"
+          className="form-control mb-3"
+          placeholder="Search by Ship ID, Name, Registration Number, Country, or Port"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
 
-      <button
-        className="btn btn-dark mb-3"
-        onClick={() => setShowAddModal(true)}
-      >
-        Add New Ship
-      </button>
+        <button
+          className="btn btn-dark mb-3"
+          onClick={() => setShowAddModal(true)}
+        >
+          Add New Ship
+        </button>
 
-      <div className="table-responsive">
-        <table className="table table-striped table-bordered table-hover">
-          <thead className="table-dark">
-            <tr>
-              <th className="text-center">Ship ID</th>
-              <th className="text-center">Ship Name</th>
-              <th className="text-center">Capacity</th>
-              <th className="text-center">Registration Number</th>
-              <th className="text-center">Owner</th>
-              <th className="text-center">Country</th>
-              <th className="text-center">Port</th>
-              <th className="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentShips.length > 0 ? (
-              currentShips.map((ship) => (
-                <tr key={ship.ship_id}>
-                  <td className="text-center">{ship.ship_id}</td>
-                  <td className="text-center">{ship.ship_name}</td>
-                  <td className="text-center">{ship.capacity}</td>
-                  <td className="text-center">{ship.registration_number}</td>
-                  <td className="text-center">{ship.owner}</td>
-                  <td className="text-center">{ship.country_name}</td>
-                  <td className="text-center">
-                    {ship.port_id} - {ship.port_name}
-                  </td>
-                  <td className="text-center">
-                    <button
-                      className="btn btn-dark btn-sm me-2"
-                      onClick={() => handleEditClick(ship)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDeleteClick(ship.ship_id)}
-                    >
-                      Delete
-                    </button>
+        <div className="table-responsive">
+          <table className="table table-striped table-bordered table-hover">
+            <thead className="table-dark">
+              <tr>
+                <th className="text-center">Ship ID</th>
+                <th className="text-center">Ship Name</th>
+                <th className="text-center">Capacity</th>
+                <th className="text-center">Registration Number</th>
+                <th className="text-center">Owner</th>
+                <th className="text-center">Country</th>
+                <th className="text-center">Port</th>
+                <th className="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentShips.length > 0 ? (
+                currentShips.map((ship) => (
+                  <tr key={ship.ship_id}>
+                    <td className="text-center">{ship.ship_id}</td>
+                    <td className="text-center">{ship.ship_name}</td>
+                    <td className="text-center">{ship.capacity}</td>
+                    <td className="text-center">{ship.registration_number}</td>
+                    <td className="text-center">{ship.owner}</td>
+                    <td className="text-center">{ship.country_name}</td>
+                    <td className="text-center">
+                      {ship.port_id} - {ship.port_name}
+                    </td>
+                    <td className="text-center">
+                      <button
+                        className="btn btn-dark btn-sm me-2"
+                        onClick={() => handleEditClick(ship)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeleteClick(ship.ship_id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center">
+                    No ships found
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-center">
-                  No ships found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <nav>
-          <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-              <button
-                onClick={() => setCurrentPage(currentPage - 1)}
-                className="page-link bg-transparent text-dark border-0"
-              >
-                Prev
-              </button>
-            </li>
-            {Array.from({ length: totalPages }, (_, index) => (
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <nav>
+            <ul className="pagination justify-content-center">
               <li
-                key={index}
+                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+              >
+                <button
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  className="page-link bg-transparent text-dark border-0"
+                >
+                  Prev
+                </button>
+              </li>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <li
+                  key={index}
+                  className={`page-item ${
+                    currentPage === index + 1 ? "active" : ""
+                  }`}
+                >
+                  <button
+                    onClick={() => setCurrentPage(index + 1)}
+                    className="page-link bg-transparent border-0"
+                  >
+                    {index + 1}
+                  </button>
+                </li>
+              ))}
+              <li
                 className={`page-item ${
-                  currentPage === index + 1 ? "active" : ""
+                  currentPage === totalPages ? "disabled" : ""
                 }`}
               >
                 <button
-                  onClick={() => setCurrentPage(index + 1)}
-                  className="page-link bg-transparent border-0"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  className="page-link bg-transparent text-dark border-0"
                 >
-                  {index + 1}
+                  Next
                 </button>
               </li>
-            ))}
-            <li
-              className={`page-item ${
-                currentPage === totalPages ? "disabled" : ""
-              }`}
-            >
-              <button
-                onClick={() => setCurrentPage(currentPage + 1)}
-                className="page-link bg-transparent text-dark border-0"
-              >
-                Next
-              </button>
-            </li>
-          </ul>
-        </nav>
-      )}
+            </ul>
+          </nav>
+        )}
 
-      {/* Edit Modal */}
-      {showEditModal && selectedShip && (
-        <div className="modal fade show" style={{ display: "block" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Ship</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowEditModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label htmlFor="shipName" className="form-label">
-                    Ship Name
-                  </label>
-                  <input
-                    type="text"
-                    id="shipName"
-                    name="ship_name"
-                    className="form-control"
-                    value={selectedShip.ship_name}
-                    onChange={handleChange}
-                  />
+        {/* Edit Modal */}
+        {showEditModal && selectedShip && (
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Edit Ship</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowEditModal(false)}
+                  ></button>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="capacity" className="form-label">
-                    Capacity
-                  </label>
-                  <input
-                    type="number"
-                    id="capacity"
-                    name="capacity"
-                    className="form-control"
-                    value={selectedShip.capacity}
-                    onChange={handleChange}
-                  />
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="shipName" className="form-label">
+                      Ship Name
+                    </label>
+                    <input
+                      type="text"
+                      id="shipName"
+                      name="ship_name"
+                      className="form-control"
+                      value={selectedShip.ship_name}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="capacity" className="form-label">
+                      Capacity
+                    </label>
+                    <input
+                      type="number"
+                      id="capacity"
+                      name="capacity"
+                      className="form-control"
+                      value={selectedShip.capacity}
+                      onChange={handleChange}
+                      min={0}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="registrationNumber" className="form-label">
+                      Registration Number
+                    </label>
+                    <input
+                      type="text"
+                      id="registrationNumber"
+                      name="registration_number"
+                      className="form-control"
+                      value={selectedShip.registration_number}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="owner" className="form-label">
+                      Owner
+                    </label>
+                    <input
+                      type="text"
+                      id="owner"
+                      name="owner"
+                      className="form-control"
+                      value={selectedShip.owner}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="countryId" className="form-label">
+                      Country
+                    </label>
+                    <select
+                      id="countryId"
+                      name="country_id"
+                      className="form-control"
+                      value={selectedShip.country_id}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Country</option>
+                      {countries.map((country) => (
+                        <option
+                          key={country.country_id}
+                          value={country.country_id}
+                        >
+                          {country.country_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="portId" className="form-label">
+                      Port
+                    </label>
+                    <select
+                      id="portId"
+                      name="port_id"
+                      className="form-control"
+                      value={selectedShip.port_id}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Port</option>
+                      {ports.map((port) => (
+                        <option key={port.port_id} value={port.port_id}>
+                          {port.port_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="registrationNumber" className="form-label">
-                    Registration Number
-                  </label>
-                  <input
-                    type="text"
-                    id="registrationNumber"
-                    name="registration_number"
-                    className="form-control"
-                    value={selectedShip.registration_number}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="owner" className="form-label">
-                    Owner
-                  </label>
-                  <input
-                    type="text"
-                    id="owner"
-                    name="owner"
-                    className="form-control"
-                    value={selectedShip.owner}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="countryId" className="form-label">
-                    Country
-                  </label>
-                  <select
-                    id="countryId"
-                    name="country_id"
-                    className="form-control"
-                    value={selectedShip.country_id}
-                    onChange={handleChange}
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
                   >
-                    <option value="">Select Country</option>
-                    {countries.map((country) => (
-                      <option
-                        key={country.country_id}
-                        value={country.country_id}
-                      >
-                        {country.country_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="portId" className="form-label">
-                    Port
-                  </label>
-                  <select
-                    id="portId"
-                    name="port_id"
-                    className="form-control"
-                    value={selectedShip.port_id}
-                    onChange={handleChange}
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveChanges}
                   >
-                    <option value="">Select Port</option>
-                    {ports.map((port) => (
-                      <option key={port.port_id} value={port.port_id}>
-                        {port.port_name}
-                      </option>
-                    ))}
-                  </select>
+                    Save Changes
+                  </button>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSaveChanges}
-                >
-                  Save Changes
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Add Ship Modal */}
-      {showAddModal && (
-        <div className="modal fade show" style={{ display: "block" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Add New Ship</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowAddModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label htmlFor="shipName" className="form-label">
-                    Ship Name
-                  </label>
-                  <input
-                    type="text"
-                    id="shipName"
-                    name="ship_name"
-                    className="form-control"
-                    value={newShip.ship_name}
-                    onChange={handleAddShipChange}
-                  />
+        {/* Add Ship Modal */}
+        {showAddModal && (
+          <div className="modal fade show" style={{ display: "block" }}>
+            <div className="modal-dialog">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Add New Ship</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowAddModal(false)}
+                  ></button>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="capacity" className="form-label">
-                    Capacity
-                  </label>
-                  <input
-                    type="number"
-                    id="capacity"
-                    name="capacity"
-                    className="form-control"
-                    value={newShip.capacity}
-                    onChange={handleAddShipChange}
-                  />
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label htmlFor="shipName" className="form-label">
+                      Ship Name
+                    </label>
+                    <input
+                      type="text"
+                      id="shipName"
+                      name="ship_name"
+                      className="form-control"
+                      value={newShip.ship_name}
+                      onChange={handleAddShipChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="capacity" className="form-label">
+                      Capacity
+                    </label>
+                    <input
+                      type="number"
+                      id="capacity"
+                      name="capacity"
+                      className="form-control"
+                      value={newShip.capacity}
+                      onChange={handleAddShipChange}
+                      min={0}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="registrationNumber" className="form-label">
+                      Registration Number
+                    </label>
+                    <input
+                      type="text"
+                      id="registrationNumber"
+                      name="registration_number"
+                      className="form-control"
+                      value={newShip.registration_number}
+                      onChange={handleAddShipChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="owner" className="form-label">
+                      Owner
+                    </label>
+                    <input
+                      type="text"
+                      id="owner"
+                      name="owner"
+                      className="form-control"
+                      value={newShip.owner}
+                      onChange={handleAddShipChange}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="countryId" className="form-label">
+                      Country
+                    </label>
+                    <select
+                      id="countryId"
+                      name="country_id"
+                      className="form-control"
+                      value={newShip.country_id}
+                      onChange={handleAddShipChange}
+                    >
+                      <option value="">Select Country</option>
+                      {countries.map((country) => (
+                        <option
+                          key={country.country_id}
+                          value={country.country_id}
+                        >
+                          {country.country_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="portId" className="form-label">
+                      Port
+                    </label>
+                    <select
+                      id="portId"
+                      name="port_id"
+                      className="form-control"
+                      value={newShip.port_id}
+                      onChange={handleAddShipChange}
+                    >
+                      <option value="">Select Port</option>
+                      {ports.map((port) => (
+                        <option key={port.port_id} value={port.port_id}>
+                          {port.port_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="registrationNumber" className="form-label">
-                    Registration Number
-                  </label>
-                  <input
-                    type="text"
-                    id="registrationNumber"
-                    name="registration_number"
-                    className="form-control"
-                    value={newShip.registration_number}
-                    onChange={handleAddShipChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="owner" className="form-label">
-                    Owner
-                  </label>
-                  <input
-                    type="text"
-                    id="owner"
-                    name="owner"
-                    className="form-control"
-                    value={newShip.owner}
-                    onChange={handleAddShipChange}
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="countryId" className="form-label">
-                    Country
-                  </label>
-                  <select
-                    id="countryId"
-                    name="country_id"
-                    className="form-control"
-                    value={newShip.country_id}
-                    onChange={handleAddShipChange}
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowAddModal(false)}
                   >
-                    <option value="">Select Country</option>
-                    {countries.map((country) => (
-                      <option
-                        key={country.country_id}
-                        value={country.country_id}
-                      >
-                        {country.country_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="portId" className="form-label">
-                    Port
-                  </label>
-                  <select
-                    id="portId"
-                    name="port_id"
-                    className="form-control"
-                    value={newShip.port_id}
-                    onChange={handleAddShipChange}
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleAddShipSubmit}
                   >
-                    <option value="">Select Port</option>
-                    {ports.map((port) => (
-                      <option key={port.port_id} value={port.port_id}>
-                        {port.port_name}
-                      </option>
-                    ))}
-                  </select>
+                    Add Ship
+                  </button>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowAddModal(false)}
-                >
-                  Close
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleAddShipSubmit}
-                >
-                  Add Ship
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
 
