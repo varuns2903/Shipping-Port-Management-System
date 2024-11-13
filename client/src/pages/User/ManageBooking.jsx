@@ -8,6 +8,9 @@ import Navbar from "../../components/Navbar";
 
 const ManageBooking = () => {
   const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,7 +19,6 @@ const ManageBooking = () => {
       try {
         const token = localStorage.getItem("authToken");
 
-        // Step 1: Fetch the user ID from the token
         const userResponse = await axios.get(
           "http://localhost:5000/api/users/profile",
           {
@@ -25,7 +27,6 @@ const ManageBooking = () => {
         );
         const userId = userResponse.data.data.user_id;
 
-        // Step 2: Fetch bookings for this user ID
         const bookingsResponse = await axios.get(
           `http://localhost:5000/api/bookings/user/${userId}`,
           {
@@ -33,6 +34,7 @@ const ManageBooking = () => {
           }
         );
         setBookings(bookingsResponse.data);
+        setFilteredBookings(bookingsResponse.data);
       } catch (error) {
         console.error("Error fetching user or bookings:", error);
         setError("Failed to load bookings.");
@@ -43,6 +45,20 @@ const ManageBooking = () => {
     fetchUserIdAndBookings();
   }, []);
 
+  useEffect(() => {
+    const filtered = bookings.filter((booking) => {
+      const matchesSearchTerm =
+        booking.booking_id.toString().includes(searchTerm) ||
+        booking.port_name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        filterStatus === "all" || booking.booking_status === filterStatus;
+
+      return matchesSearchTerm && matchesStatus;
+    });
+    setFilteredBookings(filtered);
+  }, [searchTerm, filterStatus, bookings]);
+
   const handleDelete = async (bookingId) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -50,7 +66,6 @@ const ManageBooking = () => {
         headers: { Authorization: token },
       });
 
-      // Remove the deleted booking from the local state
       setBookings(
         bookings.filter((booking) => booking.booking_id !== bookingId)
       );
@@ -70,7 +85,80 @@ const ManageBooking = () => {
       <div className="container mt-5">
         <h2 className="mb-4">Manage Your Bookings</h2>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-        {bookings.length === 0 ? (
+
+        {/* Search Bar */}
+        <div className="mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search by Booking ID or Port Name"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {/* Status Filter */}
+        <div className="mb-4">
+          <label className="me-3">Filter by Status:</label>
+          <div className="form-check form-check-inline">
+            <input
+              className="form-check-input"
+              type="radio"
+              name="status"
+              id="statusAll"
+              value="all"
+              checked={filterStatus === "all"}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            />
+            <label className="form-check-label" htmlFor="statusAll">
+              All
+            </label>
+          </div>
+          <div className="form-check form-check-inline">
+            <input
+              className="form-check-input"
+              type="radio"
+              name="status"
+              id="statusPending"
+              value="pending"
+              checked={filterStatus === "pending"}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            />
+            <label className="form-check-label" htmlFor="statusPending">
+              Pending
+            </label>
+          </div>
+          <div className="form-check form-check-inline">
+            <input
+              className="form-check-input"
+              type="radio"
+              name="status"
+              id="statusConfirmed"
+              value="confirmed"
+              checked={filterStatus === "confirmed"}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            />
+            <label className="form-check-label" htmlFor="statusConfirmed">
+              Confirmed
+            </label>
+          </div>
+          <div className="form-check form-check-inline">
+            <input
+              className="form-check-input"
+              type="radio"
+              name="status"
+              id="statusCancelled"
+              value="canceled"
+              checked={filterStatus === "canceled"}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            />
+            <label className="form-check-label" htmlFor="statusCancelled">
+              Cancelled
+            </label>
+          </div>
+        </div>
+
+        {filteredBookings.length === 0 ? (
           <p>No bookings available.</p>
         ) : (
           <table className="table table-bordered table-striped">
@@ -81,12 +169,12 @@ const ManageBooking = () => {
                 <th>Status</th>
                 <th>From Date</th>
                 <th>To Date</th>
-                <th>Required Space</th> {/* New Column */}
+                <th>Required Space</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {bookings.map((booking) => (
+              {filteredBookings.map((booking) => (
                 <tr key={booking.booking_id}>
                   <td>{booking.booking_id}</td>
                   <td>{booking.port_name}</td>
@@ -97,8 +185,7 @@ const ManageBooking = () => {
                   <td>
                     {new Date(booking.booking_date_end).toLocaleDateString()}
                   </td>
-                  <td>{booking.required_space} m³</td>{" "}
-                  {/* Display required_space */}
+                  <td>{booking.required_space} m³</td>
                   <td>
                     {booking.booking_status === "pending" ? (
                       <button

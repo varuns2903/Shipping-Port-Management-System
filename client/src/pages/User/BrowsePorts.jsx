@@ -1,4 +1,3 @@
-// src/pages/BrowsePorts.jsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +8,7 @@ const BrowsePorts = () => {
   const [ports, setPorts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +23,6 @@ const BrowsePorts = () => {
         setLoading(false);
       } catch (error) {
         console.log(error);
-
         setError("Failed to load ports.");
         setLoading(false);
       }
@@ -31,14 +30,35 @@ const BrowsePorts = () => {
     fetchPorts();
   }, []);
 
-  if (loading) return <p>Loading ports...</p>;
-  if (error) return <p>{error}</p>;
+  const filteredPorts = ports.filter(
+    (port) =>
+      port.port_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (port.country_name &&
+        port.country_name.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
     <>
       <Navbar />
       <div className="container mt-5">
         <h2 className="mb-4">Browse Available Ports</h2>
+
+        {/* Search Bar */}
+        <div className="mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search by port or country name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Loading Spinner */}
+        {loading && <p>Loading ports...</p>}
+        {error && <p className="alert alert-danger">{error}</p>}
+
+        {/* Ports Table */}
         <div className="table-responsive">
           <table className="table table-striped table-bordered">
             <thead className="table-dark">
@@ -51,16 +71,15 @@ const BrowsePorts = () => {
               </tr>
             </thead>
             <tbody>
-              {ports.map((port) => (
+              {filteredPorts.map((port) => (
                 <tr key={port.port_id}>
                   <td>{port.port_name}</td>
                   <td>{port.country_name || "Unknown"}</td>
-                  {/* Display country_name */}
                   <td>{port.capacity}</td>
                   <td>{port.available_space}</td>
                   <td>
                     <button
-                      className="btn btn-dark btn-sm"
+                      className="btn btn-primary btn-sm"
                       onClick={() =>
                         navigate(`/user/book-port?portId=${port.port_id}`)
                       }
@@ -70,6 +89,13 @@ const BrowsePorts = () => {
                   </td>
                 </tr>
               ))}
+              {filteredPorts.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="text-center">
+                    No ports found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
