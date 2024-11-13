@@ -13,17 +13,15 @@ const BookPort = () => {
     user_id: "",
     port_id: "",
     ship_id: "",
-    booking_date_start: "", // Changed to booking_date_start
-    booking_date_end: "", // Changed to booking_date_start
+    booking_date_start: "",
+    booking_date_end: "",
     required_space: 0,
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Extract portId from the query parameter if present
   const portId = new URLSearchParams(location.search).get("portId");
 
-  // Fetch user ID and optionally autofill port details if portId exists
   useEffect(() => {
     const token = localStorage.getItem("authToken");
 
@@ -38,17 +36,15 @@ const BookPort = () => {
           setBookingData((prevData) => ({
             ...prevData,
             user_id: userId,
-            port_id: portId || "", // Set port_id if portId is provided
+            port_id: portId || "",
           }));
 
-          // Fetch all ports data
           const portResponse = await axios.get(
             `http://localhost:5000/api/ports/browse`,
             { headers: { Authorization: token } }
           );
           setPorts(portResponse.data);
 
-          // If portId exists, autofill port name and available capacity
           if (portId) {
             const selectedPort = portResponse.data.find(
               (port) => port.port_id === parseInt(portId)
@@ -71,7 +67,6 @@ const BookPort = () => {
     fetchUserIdAndPort();
   }, [portId]);
 
-  // Fetch ships data
   useEffect(() => {
     const fetchShips = async () => {
       const token = localStorage.getItem("authToken");
@@ -91,7 +86,6 @@ const BookPort = () => {
     fetchShips();
   }, []);
 
-  // Handle input changes
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     setBookingData((prevData) => ({
@@ -110,7 +104,6 @@ const BookPort = () => {
       }
     }
 
-    // Set ship_name based on selected ship_id
     if (name === "ship_id") {
       const selectedShip = ships.find(
         (ship) => ship.ship_id === parseInt(value)
@@ -124,7 +117,6 @@ const BookPort = () => {
     }
   };
 
-  // Handle required space validation
   const checkAvailableSpace = async () => {
     const token = localStorage.getItem("authToken");
     try {
@@ -188,7 +180,6 @@ const BookPort = () => {
     }
   };
 
-  // Get current date and time for the min date and time validation
   const currentDateTime = new Date().toISOString().slice(0, 16);
 
   return (
