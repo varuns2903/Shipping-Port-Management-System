@@ -13,9 +13,11 @@ const BrowsePorts = () => {
 
   useEffect(() => {
     const fetchPorts = async () => {
+      const token = localStorage.getItem("authToken");
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/ports/browse"
+          "http://localhost:5000/api/ports/browse",
+          { headers: { Authorization: token } }
         );
         setPorts(response.data);
         setLoading(false);

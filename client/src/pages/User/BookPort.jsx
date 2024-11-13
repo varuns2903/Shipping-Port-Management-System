@@ -44,7 +44,8 @@ const BookPort = () => {
 
           // Fetch all ports data
           const portResponse = await axios.get(
-            `http://localhost:5000/api/ports/browse`
+            `http://localhost:5000/api/ports/browse`,
+            { headers: { Authorization: token } }
           );
           setPorts(portResponse.data);
 
@@ -74,9 +75,11 @@ const BookPort = () => {
   // Fetch ships data
   useEffect(() => {
     const fetchShips = async () => {
+      const token = localStorage.getItem("authToken");
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/bookings/ships"
+          "http://localhost:5000/api/bookings/ships",
+          { headers: { Authorization: token } }
         );
         setShips(response.data);
       } catch (error) {
@@ -124,9 +127,11 @@ const BookPort = () => {
 
   // Handle required space validation
   const checkAvailableSpace = async () => {
+    const token = localStorage.getItem("authToken");
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/bookings/checkAvailableSpace/${bookingData.port_id}`
+        `http://localhost:5000/api/bookings/checkAvailableSpace/${bookingData.port_id}`,
+        { headers: { Authorization: token } }
       );
       const availableSpace = response.data.available_space;
       if (bookingData.required_space > availableSpace) {
@@ -149,9 +154,14 @@ const BookPort = () => {
     if (errorMessage) {
       return;
     }
+    const token = localStorage.getItem("authToken");
 
     try {
-      await axios.post("http://localhost:5000/api/bookings/book", bookingData);
+      await axios.post(
+        "http://localhost:5000/api/bookings/book",
+        { headers: { Authorization: token } },
+        bookingData
+      );
       setSuccessMessage("Booking successful!");
       setErrorMessage("");
       setBookingData({
