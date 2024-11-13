@@ -69,8 +69,8 @@ function ManageCountries() {
         );
         toast.success("Country deleted successfully");
       } catch (error) {
-        toast.error("Failed to delete country");
-        console.error("Error deleting country:", error.response || error);
+        toast.error(error.response.data.error);
+        console.error("Error deleting country:", error.response || error);        
       }
     }
   };

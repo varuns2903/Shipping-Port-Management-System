@@ -833,12 +833,17 @@ const adminDashboardController = {
         Ports.port_name,
         Ports.capacity,
         Ports.available_space,
-        ((Ports.capacity - Ports.available_space) / Ports.capacity) * 100 AS capacityUtilization,
-        (SELECT COUNT(*) FROM Bookings WHERE Bookings.port_id = Ports.port_id AND (booking_status = 'confirmed' OR booking_status = 'pending')) AS activeBookings,
-        (SELECT SUM(Container.weight) FROM Container 
-         INNER JOIN Bookings ON Container.booking_id = Bookings.booking_id 
-         WHERE Bookings.port_id = Ports.port_id) AS totalCargoLoad
-      FROM Ports
+        calculate_port_utilization(Ports.port_id) AS capacityUtilization,
+        (SELECT COUNT(*) 
+        FROM Bookings 
+        WHERE Bookings.port_id = Ports.port_id 
+        AND (booking_status = 'confirmed' OR booking_status = 'pending')) AS activeBookings,
+        (SELECT SUM(Container.weight) 
+        FROM Container 
+        INNER JOIN Bookings ON Container.booking_id = Bookings.booking_id 
+        WHERE Bookings.port_id = Ports.port_id) AS totalCargoLoad
+      FROM Ports;
+
     `;
     db.query(statsQuery, (err, results) => {
       if (err) {

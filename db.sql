@@ -78,3 +78,97 @@ CREATE TABLE Container (
     FOREIGN KEY (ship_id) REFERENCES Ships(ship_id) ON DELETE CASCADE,
     FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id) ON DELETE CASCADE
 );
+
+-- Procedure for adding booking
+DELIMITER //
+CREATE PROCEDURE add_booking(
+  IN p_user_id INT,
+  IN p_port_id INT,
+  IN p_ship_id INT,
+  IN p_start_date TIMESTAMP,
+  IN p_end_date TIMESTAMP,
+  IN p_required_space INT
+)
+BEGIN
+  DECLARE available INT;
+  DECLARE new_booking_id INT;
+
+  SELECT available_space INTO available FROM Ports WHERE port_id = p_port_id;
+
+  IF available >= p_required_space THEN
+    INSERT INTO Bookings (user_id, port_id, ship_id, booking_date_start, booking_date_end, booking_status, required_space)
+    VALUES (p_user_id, p_port_id, p_ship_id, p_start_date, p_end_date, 'pending', p_required_space);
+    
+    SET new_booking_id = LAST_INSERT_ID();
+
+    UPDATE Ports
+    SET available_space = available_space - p_required_space
+    WHERE port_id = p_port_id;
+
+    SELECT 'Booking created successfully' AS message, new_booking_id AS booking_id;
+  ELSE
+    SIGNAL SQLSTATE '45000' 
+    SET MESSAGE_TEXT = 'Insufficient space available at the selected port for this booking.';
+  END IF;
+END //
+DELIMITER ;
+
+-- Function to calculate port utilization
+DELIMITER //
+CREATE FUNCTION calculate_port_utilization(pid INT)
+RETURNS DECIMAL(5,2)
+DETERMINISTIC
+BEGIN
+  DECLARE total_capacity INT;
+  DECLARE space_available INT;
+  DECLARE utilization DECIMAL(5,2);
+
+  SELECT capacity, available_space INTO total_capacity, space_available
+  FROM Ports
+  WHERE port_id = pid;
+
+  IF total_capacity > 0 THEN
+    SET utilization = ((total_capacity - space_available) / total_capacity) * 100;
+  ELSE
+    SET utilization = 0;
+  END IF;
+
+  RETURN utilization;
+END //
+DELIMITER ;
+
+-- Trigger for preventing deletion of country if associated with any port or ship
+DELIMITER //
+CREATE TRIGGER prevent_country_deletion
+BEFORE DELETE ON Country
+FOR EACH ROW
+BEGIN
+  DECLARE port_count INT;
+  DECLARE ship_count INT;
+  
+  SELECT COUNT(*) INTO port_count FROM Ports WHERE country_id = OLD.country_id;
+  SELECT COUNT(*) INTO ship_count FROM Ships WHERE country_id = OLD.country_id;
+  
+  IF port_count > 0 OR ship_count > 0 THEN
+    SIGNAL SQLSTATE '45000' 
+    SET MESSAGE_TEXT = 'Cannot delete country with associated ports or ships.';
+  END IF;
+END //
+DELIMITER ;
+
+-- Trigger for prevention of deletion of ports if associated with any ship
+DELIMITER //
+CREATE TRIGGER prevent_port_deletion
+BEFORE DELETE ON Ports
+FOR EACH ROW
+BEGIN
+  DECLARE ship_count INT;
+
+  SELECT COUNT(*) INTO ship_count FROM Ships WHERE port_id = OLD.port_id;
+
+  IF ship_count > 0 THEN
+    SIGNAL SQLSTATE '45000' 
+    SET MESSAGE_TEXT = 'Cannot delete port with associated ships.';
+  END IF;
+END //
+DELIMITER ;

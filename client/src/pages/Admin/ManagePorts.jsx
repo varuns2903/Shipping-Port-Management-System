@@ -89,7 +89,7 @@ function ManagePorts() {
         fetchPorts();
         toast.success("Port deleted successfully");
       } catch (error) {
-        toast.error("Failed to delete port");
+        toast.error(error.response.data.error);
         console.error("Error deleting port:", error.response || error);
       }
     }
