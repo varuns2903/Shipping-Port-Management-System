@@ -135,13 +135,13 @@ function ProfilePage() {
                 {isEditing ? (
                   <>
                     <button
-                      className="btn btn-dark me-2"
+                      className="btn btn-success me-2"
                       onClick={handleSaveChanges}
                     >
                       Save Changes
                     </button>
                     <button
-                      className="btn btn-secondary"
+                      className="btn btn-danger"
                       onClick={() => setIsEditing(false)}
                     >
                       Cancel

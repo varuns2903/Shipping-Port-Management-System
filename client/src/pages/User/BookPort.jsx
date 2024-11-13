@@ -15,7 +15,6 @@ const BookPort = () => {
     ship_id: "",
     booking_date_start: "", // Changed to booking_date_start
     booking_date_end: "", // Changed to booking_date_start
-    ship_name: "",
     required_space: 0,
   });
   const [successMessage, setSuccessMessage] = useState("");
@@ -146,31 +145,39 @@ const BookPort = () => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("authToken");
 
-    // Ensure the required space does not exceed available space
     if (errorMessage) {
       return;
     }
-    const token = localStorage.getItem("authToken");
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/bookings/book",
-        { headers: { Authorization: token } },
-        bookingData
-      );
+      const convertToMySQLTimestamp = (dateString) => {
+        if (!dateString) return null;
+        const dateObj = new Date(dateString);
+        return dateObj.toISOString().slice(0, 19).replace("T", " ");
+      };
+
+      const bookingDataWithTimestamps = {
+        ...bookingData,
+        booking_date_start: convertToMySQLTimestamp(bookingData.booking_date_start),
+        booking_date_end: convertToMySQLTimestamp(bookingData.booking_date_end),
+      };
+
+      await axios.post("http://localhost:5000/api/bookings/book", bookingDataWithTimestamps, {
+        headers: { Authorization: token }
+      });
       setSuccessMessage("Booking successful!");
       setErrorMessage("");
       setBookingData({
+        user_id: "",
         port_id: "",
         ship_id: "",
-        booking_date_start: "", // Reset the datetime field
-        ship_name: "",
+        booking_date_start: "",
+        booking_date_end: "",
         required_space: 0,
-        user_id: "",
       });
       setSelectedPortCapacity(null);
     } catch (error) {
@@ -298,7 +305,7 @@ const BookPort = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-dark">
             Book Port
           </button>
         </form>

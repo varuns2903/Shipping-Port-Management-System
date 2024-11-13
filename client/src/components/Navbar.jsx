@@ -1,15 +1,15 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [role, setRole] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch the role from localStorage or from any context/state that has login info
-    const userRole = localStorage.getItem("role"); // Assuming role is stored as "role"
+    const userRole = localStorage.getItem("role");
     setRole(userRole);
   }, []);
 
@@ -24,6 +24,10 @@ function Navbar() {
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const isActiveLink = (path) => {
+    return location.pathname === path ? "active" : "";
   };
 
   return (
@@ -138,7 +142,15 @@ function Navbar() {
             <ul className="nav flex-column mt-2">
               <li className="nav-item">
                 <button
-                  className="nav-link text-light"
+                  className={`nav-link text-light ${isActiveLink("/admin/dashboard")}`}
+                  onClick={() => navigate("/admin/dashboard")}
+                >
+                  Home
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link text-light ${isActiveLink("/admin/manage-users")}`}
                   onClick={() => navigate("/admin/manage-users")}
                 >
                   Manage Users
@@ -146,7 +158,7 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className="nav-link text-light"
+                  className={`nav-link text-light ${isActiveLink("/admin/manage-ports")}`}
                   onClick={() => navigate("/admin/manage-ports")}
                 >
                   Manage Ports
@@ -154,7 +166,7 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className="nav-link text-light"
+                  className={`nav-link text-light ${isActiveLink("/admin/manage-bookings")}`}
                   onClick={() => navigate("/admin/manage-bookings")}
                 >
                   Manage Bookings
@@ -162,7 +174,7 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className="nav-link text-light"
+                  className={`nav-link text-light ${isActiveLink("/admin/manage-countries")}`}
                   onClick={() => navigate("/admin/manage-countries")}
                 >
                   Manage Countries
@@ -170,7 +182,7 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className="nav-link text-light"
+                  className={`nav-link text-light ${isActiveLink("/admin/manage-employees")}`}
                   onClick={() => navigate("/admin/manage-employees")}
                 >
                   Manage Employees
@@ -178,7 +190,7 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className="nav-link text-light"
+                  className={`nav-link text-light ${isActiveLink("/admin/manage-ships")}`}
                   onClick={() => navigate("/admin/manage-ships")}
                 >
                   Manage Ships
@@ -186,7 +198,7 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className="nav-link text-light"
+                  className={`nav-link text-light ${isActiveLink("/admin/manage-containers")}`}
                   onClick={() => navigate("/admin/manage-containers")}
                 >
                   Manage Containers
@@ -222,6 +234,10 @@ function Navbar() {
             right: 0%;
             left: auto;
             transform: translateX(-10px);
+          }
+          .nav-link.active {
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.1);
           }
         `}
       </style>

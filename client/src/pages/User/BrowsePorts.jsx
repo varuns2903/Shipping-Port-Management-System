@@ -60,7 +60,7 @@ const BrowsePorts = () => {
                   <td>{port.available_space}</td>
                   <td>
                     <button
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-dark btn-sm"
                       onClick={() =>
                         navigate(`/user/book-port?portId=${port.port_id}`)
                       }

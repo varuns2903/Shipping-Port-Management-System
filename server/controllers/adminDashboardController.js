@@ -239,41 +239,138 @@ const adminDashboardController = {
     const { booking_id } = req.params;
     const { booking_status } = req.body;
 
-    db.query(
-      "UPDATE Bookings SET booking_status = ? WHERE booking_id = ?",
-      [booking_status, booking_id],
-      (err, results) => {
-        if (err) {
-          console.error("Error updating bookings:", err);
-          return res
-            .status(500)
-            .json({ message: "Error updating bookings", error: err.message });
+    if (booking_status === "canceled") {
+      db.query(
+        "SELECT port_id, required_space FROM Bookings WHERE booking_id = ?",
+        [booking_id],
+        (err, results) => {
+          if (err) {
+            console.error("Error fetching booking details:", err);
+            return res.status(500).json({
+              message: "Error fetching booking details",
+              error: err.message,
+            });
+          }
+
+          if (results.length === 0) {
+            return res.status(404).json({ message: "Booking not found" });
+          }
+
+          const { port_id, required_space } = results[0];
+
+          db.query(
+            "UPDATE Bookings SET booking_status = ? WHERE booking_id = ?",
+            [booking_status, booking_id],
+            (err, updateResults) => {
+              if (err) {
+                console.error("Error updating booking status:", err);
+                return res.status(500).json({
+                  message: "Error updating booking status",
+                  error: err.message,
+                });
+              }
+
+              if (updateResults.affectedRows === 0) {
+                return res.status(404).json({ message: "Booking not found" });
+              }
+
+              db.query(
+                "UPDATE Ports SET available_space = available_space + ? WHERE port_id = ?",
+                [required_space, port_id],
+                (err, updateSpaceResults) => {
+                  if (err) {
+                    console.error("Error updating available space:", err);
+                    return res.status(500).json({
+                      message: "Error updating available space",
+                      error: err.message,
+                    });
+                  }
+
+                  res.json({
+                    message: "Booking updated and space refunded successfully",
+                  });
+                }
+              );
+            }
+          );
         }
-        if (results.affectedRows === 0) {
-          return res.status(404).json({ message: "Booking not found" });
+      );
+    } else {
+      db.query(
+        "UPDATE Bookings SET booking_status = ? WHERE booking_id = ?",
+        [booking_status, booking_id],
+        (err, results) => {
+          if (err) {
+            console.error("Error updating bookings:", err);
+            return res
+              .status(500)
+              .json({ message: "Error updating bookings", error: err.message });
+          }
+          if (results.affectedRows === 0) {
+            return res.status(404).json({ message: "Booking not found" });
+          }
+          res.json({ message: "Booking updated successfully" });
         }
-        res.json({ message: "Booking updated successfully" });
-      }
-    );
+      );
+    }
   },
 
   deleteBookings: async (req, res) => {
     const { booking_id } = req.params;
 
     db.query(
-      "DELETE FROM Bookings WHERE booking_id = ?",
+      "SELECT port_id, required_space FROM Bookings WHERE booking_id = ?",
       [booking_id],
       (err, results) => {
         if (err) {
-          console.error("Error fetching bookings:", err);
-          return res
-            .status(500)
-            .json({ message: "Error fetching bookings", error: err.message });
+          console.error("Error fetching booking details:", err);
+          return res.status(500).json({
+            message: "Error fetching booking details",
+            error: err.message,
+          });
         }
-        if (results.affectedRows === 0) {
+
+        if (results.length === 0) {
           return res.status(404).json({ message: "Booking not found" });
         }
-        res.json({ message: "Booking deleted successfully" });
+
+        const { port_id, required_space } = results[0];
+
+        db.query(
+          "DELETE FROM Bookings WHERE booking_id = ?",
+          [booking_id],
+          (err, deleteResults) => {
+            if (err) {
+              console.error("Error deleting booking:", err);
+              return res.status(500).json({
+                message: "Error deleting booking",
+                error: err.message,
+              });
+            }
+
+            if (deleteResults.affectedRows === 0) {
+              return res.status(404).json({ message: "Booking not found" });
+            }
+
+            db.query(
+              "UPDATE Ports SET available_space = available_space + ? WHERE port_id = ?",
+              [required_space, port_id],
+              (err, updateResults) => {
+                if (err) {
+                  console.error("Error updating available space:", err);
+                  return res.status(500).json({
+                    message: "Error updating available space",
+                    error: err.message,
+                  });
+                }
+
+                res.json({
+                  message: "Booking deleted and space updated successfully",
+                });
+              }
+            );
+          }
+        );
       }
     );
   },
@@ -552,24 +649,20 @@ const adminDashboardController = {
     }
 
     const checkQuery = `SELECT * FROM Ships WHERE registration_number = ?`;
-    
+
     db.query(checkQuery, [registration_number], (err, results) => {
       if (err) {
         console.error("Error checking ship existence:", err);
-        return res
-          .status(500)
-          .json({
-            message: "Error checking ship existence",
-            error: err.message,
-          });
+        return res.status(500).json({
+          message: "Error checking ship existence",
+          error: err.message,
+        });
       }
 
       if (results.length > 0) {
-        return res
-          .status(400)
-          .json({
-            message: "Ship with this registration number already exists.",
-          });
+        return res.status(400).json({
+          message: "Ship with this registration number already exists.",
+        });
       }
 
       const insertQuery = `

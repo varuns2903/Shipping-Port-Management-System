@@ -15,47 +15,26 @@ exports.checkAvailableSpace = (req, res) => {
 };
 
 exports.bookPort = (req, res) => {
-  const { user_id, port_id, ship_id, booking_date, required_space } = req.body;
+  const { user_id, port_id, ship_id, booking_date_start, booking_date_end, required_space } = req.body;  
+  
+  const addBookingQuery = `
+    CALL add_booking(?, ?, ?, ?, ?, ?)
+  `;
 
-  const checkSpaceQuery = `SELECT available_space FROM Ports WHERE port_id = ?`;
-  connection.query(checkSpaceQuery, [port_id], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: "Error checking port space" });
-    }
-
-    const availableSpace = results[0]?.available_space || 0;
-    if (availableSpace < required_space) {
-      return res.status(400).json({ error: "Not enough available space" });
-    }
-
-    const bookingQuery = `
-      INSERT INTO Bookings (user_id, port_id, ship_id, booking_status, booking_date_start, booking_date_end, required_space) 
-      VALUES (?, ?, ?, 'pending', ?, ?, ?)
-    `;
-    connection.query(
-      bookingQuery,
-      [user_id, port_id, ship_id, booking_date, required_space],
-      (err, result) => {
-        if (err) {
-          return res.status(500).json({ error: "Error creating booking" });
-        }
-
-        const updatePortQuery = `
-          UPDATE Ports SET available_space = available_space - ? WHERE port_id = ?
-        `;
-        connection.query(updatePortQuery, [required_space, port_id], (err) => {
-          if (err) {
-            return res.status(500).json({ error: "Error updating port space" });
-          }
-
-          res.status(201).json({
-            message: "Booking created successfully",
-            bookingId: result.insertId,
-          });
-        });
+  connection.query(
+    addBookingQuery,
+    [user_id, port_id, ship_id, booking_date_start, booking_date_end, required_space],
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ error: "Error creating booking" });
       }
-    );
-  });
+
+      res.status(201).json({
+        message: "Booking created successfully",
+        bookingId: results[0][0].booking_id,
+      });
+    }
+  );
 };
 
 exports.getRecentBookings = (req, res) => {
