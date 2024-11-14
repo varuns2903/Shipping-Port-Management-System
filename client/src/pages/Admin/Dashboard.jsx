@@ -37,9 +37,12 @@ function AdminDashboard() {
         });
         setPortCount(ports.data.data.length);
 
-        const bookings = await axios.get("http://localhost:5000/api/admin/bookings", {
-          headers,
-        });
+        const bookings = await axios.get(
+          "http://localhost:5000/api/admin/bookings",
+          {
+            headers,
+          }
+        );
         setBookingCount(bookings.data.data.length);
 
         const countries = await axios.get(
@@ -71,9 +74,12 @@ function AdminDashboard() {
         );
         setStats(statsResponse.data.data);
 
-        const logs = await axios.get("http://localhost:5000/api/admin/activityLogs", {
-          headers,
-        });
+        const logs = await axios.get(
+          "http://localhost:5000/api/admin/activityLogs",
+          {
+            headers,
+          }
+        );
         setActivityLogs(logs.data.data);
       } catch (error) {
         toast.error(error.response);
@@ -149,8 +155,12 @@ function AdminDashboard() {
                 >
                   <tr>
                     <th>Port Name</th>
-                    <th>Capacity (TEU)</th>
-                    <th>Available Space (TEU)</th>
+                    <th>
+                      Capacity (m<sup>3</sup>)
+                    </th>
+                    <th>
+                      Available Space (m<sup>3</sup>)
+                    </th>
                     <th>Utilization (%)</th>
                     <th>Active Bookings</th>
                     <th>Total Cargo Load (Tons)</th>

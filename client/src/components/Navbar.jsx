@@ -56,25 +56,25 @@ function Navbar() {
         {role === "user" && (
           <div className="ms-auto d-flex">
             <button
-              className="btn btn-outline-light mx-2"
+              className="btn btn-dark mx-2"
               onClick={() => navigate("/user/dashboard")}
             >
               Home
             </button>
             <button
-              className="btn btn-outline-light mx-2"
+              className="btn btn-dark mx-2"
               onClick={() => navigate("/user/book-port")}
             >
               Book Port
             </button>
             <button
-              className="btn btn-outline-light mx-2"
+              className="btn btn-dark mx-2"
               onClick={() => navigate("/user/browse-ports")}
             >
               Browse Ports
             </button>
             <button
-              className="btn btn-outline-light mx-2"
+              className="btn btn-dark mx-2"
               onClick={() => navigate("/user/Manage-Bookings")}
             >
               Manage Bookings

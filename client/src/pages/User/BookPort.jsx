@@ -291,7 +291,7 @@ const BookPort = () => {
               className="form-control"
               value={bookingData.booking_date_end}
               onChange={handleInputChange}
-              min={currentDateTime}
+              min={bookingData.booking_date_start}
               required
             />
           </div>

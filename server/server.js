@@ -10,6 +10,7 @@ const { auth, isAdmin } = require("./middleware/auth");
 require("dotenv").config();
 
 const app = express();
+
 const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],

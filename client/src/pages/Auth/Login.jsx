@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -10,7 +10,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,8 +29,11 @@ const Login = () => {
       localStorage.setItem("authToken", token);
       localStorage.setItem("role", role);
 
-      navigate(role === "admin" ? "/admin/dashboard" : "/user/dashboard");
       toast.success("Login successful!");
+      setTimeout(() => {
+        window.location.href =
+          role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+      }, 500);
     } catch (error) {
       console.error("Error during login:", error.response);
       toast.error(error.response?.data?.msg || "Login failed");

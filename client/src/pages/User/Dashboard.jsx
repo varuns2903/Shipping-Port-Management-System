@@ -88,12 +88,12 @@ function UserDashboard() {
                   <th>Status</th>
                   <th>From Booking Date</th>
                   <th>To Booking Date</th>
-                  <th>Required Space</th>
+                  <th>Required Space (m<sup>3</sup>)</th>
                 </tr>
               </thead>
               <tbody>
                 {recentBookings.length > 0 ? (
-                  recentBookings.slice(0, 5).map((booking) => (
+                  recentBookings.map((booking) => (
                     <tr key={booking.booking_id}>
                       <td>{booking.booking_id}</td>
                       <td>{booking.booking_status}</td>
@@ -147,7 +147,7 @@ function UserDashboard() {
               </thead>
               <tbody>
                 {upcomingShipments.length > 0 ? (
-                  upcomingShipments.slice(0, 5).map((shipment) => (
+                  upcomingShipments.map((shipment) => (
                     <tr key={shipment.ship_id}>
                       <td>{shipment.ship_id}</td>
                       <td>{shipment.ship_name}</td>
@@ -199,7 +199,7 @@ function UserDashboard() {
               </thead>
               <tbody>
                 {containerStatuses.length > 0 ? (
-                  containerStatuses.slice(0, 5).map((container) => (
+                  containerStatuses.map((container) => (
                     <tr key={container.container_id}>
                       <td>{container.container_id}</td>
                       <td>{container.container_type}</td>
