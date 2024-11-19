@@ -21,6 +21,7 @@ import BrowsePorts from "./pages/User/BrowsePorts"
 import BookPort from "./pages/User/BookPort";
 import ManageBooking from "./pages/User/ManageBooking";
 import PageNotFound from "./pages/PageNotFound";
+import Bookinglogs from "./pages/Admin/Bookinglogs";
 
 function App() {
   const isAuthenticated = () => !!localStorage.getItem("authToken");
@@ -77,6 +78,7 @@ function App() {
           <Route path="/admin/manage-users" element={<ManageUsers />} />
           <Route path="/admin/manage-ports" element={<ManagePorts />} />
           <Route path="/admin/manage-bookings" element={<ManageBookings />} />
+          <Route path="/admin/booking-logs" element={<Bookinglogs />} />
           <Route path="/admin/manage-countries" element={<ManageCountries />} />
           <Route path="/admin/manage-employees" element={<ManageEmployees />} />
           <Route path="/admin/manage-ships" element={<ManageShips />} />

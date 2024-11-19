@@ -13,6 +13,7 @@ router.put("/ports/:port_id", adminDashboardController.editPort);
 router.delete("/ports/:port_id", adminDashboardController.deletePort);
 
 router.get("/bookings", adminDashboardController.getBookings);
+router.get("/booking-logs", adminDashboardController.getBookingLogs);
 router.put("/bookings/:booking_id", adminDashboardController.editBookings);
 router.delete("/bookings/:booking_id", adminDashboardController.deleteBookings);
 

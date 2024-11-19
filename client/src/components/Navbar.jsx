@@ -142,7 +142,9 @@ function Navbar() {
             <ul className="nav flex-column mt-2">
               <li className="nav-item">
                 <button
-                  className={`nav-link text-light ${isActiveLink("/admin/dashboard")}`}
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/dashboard"
+                  )}`}
                   onClick={() => navigate("/admin/dashboard")}
                 >
                   Home
@@ -150,7 +152,9 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link text-light ${isActiveLink("/admin/manage-users")}`}
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/manage-users"
+                  )}`}
                   onClick={() => navigate("/admin/manage-users")}
                 >
                   Manage Users
@@ -158,7 +162,9 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link text-light ${isActiveLink("/admin/manage-ports")}`}
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/manage-ports"
+                  )}`}
                   onClick={() => navigate("/admin/manage-ports")}
                 >
                   Manage Ports
@@ -166,7 +172,9 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link text-light ${isActiveLink("/admin/manage-bookings")}`}
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/manage-bookings"
+                  )}`}
                   onClick={() => navigate("/admin/manage-bookings")}
                 >
                   Manage Bookings
@@ -174,7 +182,19 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link text-light ${isActiveLink("/admin/manage-countries")}`}
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/booking-logs"
+                  )}`}
+                  onClick={() => navigate("/admin/booking-logs")}
+                >
+                  Booking Logs
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/manage-countries"
+                  )}`}
                   onClick={() => navigate("/admin/manage-countries")}
                 >
                   Manage Countries
@@ -182,7 +202,9 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link text-light ${isActiveLink("/admin/manage-employees")}`}
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/manage-employees"
+                  )}`}
                   onClick={() => navigate("/admin/manage-employees")}
                 >
                   Manage Employees
@@ -190,7 +212,9 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link text-light ${isActiveLink("/admin/manage-ships")}`}
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/manage-ships"
+                  )}`}
                   onClick={() => navigate("/admin/manage-ships")}
                 >
                   Manage Ships
@@ -198,7 +222,9 @@ function Navbar() {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link text-light ${isActiveLink("/admin/manage-containers")}`}
+                  className={`nav-link text-light ${isActiveLink(
+                    "/admin/manage-containers"
+                  )}`}
                   onClick={() => navigate("/admin/manage-containers")}
                 >
                   Manage Containers

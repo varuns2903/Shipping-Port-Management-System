@@ -235,6 +235,20 @@ const adminDashboardController = {
     });
   },
 
+  getBookingLogs: async (req, res) => {
+    const query = `SELECT * FROM Booking_logs Order By user_id`;
+
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error("Error fetching booking_logs:", err);
+        return res
+          .status(500)
+          .json({ message: "Error fetching booking_logs", error: err.message });
+      }
+      res.json({ data: results });
+    });
+  },
+
   editBookings: async (req, res) => {
     const { booking_id } = req.params;
     const { booking_status } = req.body;

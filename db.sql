@@ -172,3 +172,40 @@ BEGIN
   END IF;
 END //
 DELIMITER ;
+
+CREATE TABLE Booking_Logs (
+    log_id INT PRIMARY KEY AUTO_INCREMENT,
+    booking_id INT,
+    user_id INT,
+    username varchar(50),
+    port_id INT,
+    portname varchar(100),
+    ship_id INT,
+    shipname varchar(100),
+    booking_date_start TIMESTAMP,
+    booking_date_end TIMESTAMP,
+    booking_status ENUM('pending', 'confirmed', 'canceled'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER //
+CREATE TRIGGER after_booking_insert
+AFTER INSERT ON Bookings
+FOR EACH ROW
+BEGIN
+    DECLARE user_name VARCHAR(50);
+    DECLARE port_name VARCHAR(100);
+    DECLARE ship_name VARCHAR(100);
+
+    SELECT username INTO user_name FROM Users WHERE user_id = NEW.user_id;
+
+    SELECT port_name INTO port_name FROM Ports WHERE port_id = NEW.port_id;
+
+    SELECT ship_name INTO ship_name FROM Ships WHERE ship_id = NEW.ship_id;
+
+    INSERT INTO Booking_Logs (booking_id, user_id, username, port_id, portname, ship_id, shipname, booking_date_start, booking_date_end, booking_status)
+    VALUES (NEW.booking_id, NEW.user_id, user_name, NEW.port_id, port_name, NEW.ship_id, ship_name, NEW.booking_date_start, NEW.booking_date_end, NEW.booking_status);
+END //
+DELIMITER ;
+
+insert into bookings () values ();
