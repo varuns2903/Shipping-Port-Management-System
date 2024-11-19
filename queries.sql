@@ -1,3 +1,4 @@
+-- All queries used in this project
 SELECT * FROM Users
 
 SELECT * FROM Users WHERE username = ? OR email = ?
