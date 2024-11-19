@@ -67,6 +67,21 @@ CREATE TABLE Bookings (
     FOREIGN KEY (ship_id) REFERENCES Ships(ship_id) ON DELETE CASCADE
 );
 
+CREATE TABLE Booking_Logs (
+    log_id INT PRIMARY KEY AUTO_INCREMENT,
+    booking_id INT,
+    user_id INT,
+    username varchar(50),
+    port_id INT,
+    portname varchar(100),
+    ship_id INT,
+    shipname varchar(100),
+    booking_date_start TIMESTAMP,
+    booking_date_end TIMESTAMP,
+    booking_status ENUM('pending', 'confirmed', 'canceled'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Container Table
 CREATE TABLE Container (
     container_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -173,21 +188,6 @@ BEGIN
 END //
 DELIMITER ;
 
-CREATE TABLE Booking_Logs (
-    log_id INT PRIMARY KEY AUTO_INCREMENT,
-    booking_id INT,
-    user_id INT,
-    username varchar(50),
-    port_id INT,
-    portname varchar(100),
-    ship_id INT,
-    shipname varchar(100),
-    booking_date_start TIMESTAMP,
-    booking_date_end TIMESTAMP,
-    booking_status ENUM('pending', 'confirmed', 'canceled'),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 DELIMITER //
 CREATE TRIGGER after_booking_insert
 AFTER INSERT ON Bookings
@@ -207,5 +207,3 @@ BEGIN
     VALUES (NEW.booking_id, NEW.user_id, user_name, NEW.port_id, port_name, NEW.ship_id, ship_name, NEW.booking_date_start, NEW.booking_date_end, NEW.booking_status);
 END //
 DELIMITER ;
-
-insert into bookings () values ();
